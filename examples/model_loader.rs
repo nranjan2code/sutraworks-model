@@ -1,45 +1,46 @@
 /// Example: Loading model weights from safetensors format
-/// 
+///
 /// This demonstrates:
 /// - Loading pre-trained weights from safetensors files
 /// - Downloading models from HuggingFace
 /// - Using the model registry
 /// - Inspecting tensor metadata
-
 use sutra_loader::prelude::*;
 
 fn main() -> Result<()> {
     println!("=== SutraWorks Model Loader Demo ===\n");
-    
+
     // 1. Model Registry
     demo_model_registry()?;
-    
+
     // 2. Safetensors Loader (with mock data)
     demo_safetensors_loader()?;
-    
+
     // 3. Model Downloader
     demo_downloader()?;
-    
+
     Ok(())
 }
 
 fn demo_model_registry() -> Result<()> {
     println!("📚 Model Registry Demo");
     println!("─────────────────────\n");
-    
+
     let registry = ModelRegistry::with_defaults();
-    
+
     // List all models
     println!("Available models:");
     for model in registry.list() {
-        println!("  • {} - {} ({} params, {})",
-                 model.id,
-                 model.name,
-                 format_params(model.num_parameters),
-                 model.architecture);
+        println!(
+            "  • {} - {} ({} params, {})",
+            model.id,
+            model.name,
+            format_params(model.num_parameters),
+            model.architecture
+        );
     }
     println!();
-    
+
     // Search for RWKV models
     println!("RWKV models:");
     for model in registry.search("rwkv") {
@@ -49,7 +50,7 @@ fn demo_model_registry() -> Result<()> {
         }
     }
     println!();
-    
+
     // Get specific model
     let model = registry.get("mamba-1.4b")?;
     println!("Mamba 1.4B details:");
@@ -60,44 +61,47 @@ fn demo_model_registry() -> Result<()> {
         println!("  Config file: {}", config);
     }
     println!();
-    
+
     Ok(())
 }
 
 fn demo_safetensors_loader() -> Result<()> {
     println!("📦 Safetensors Loader Demo");
     println!("──────────────────────────\n");
-    
+
     // Note: This would work with actual safetensors files
     println!("Example usage:");
     println!("  let loader = SafetensorsLoader::new(\"model.safetensors\")?;");
     println!("  let tensors = loader.list_tensors();");
     println!("  let weight = loader.load_tensor(\"model.layers.0.weight\")?;");
     println!();
-    
+
     println!("Features:");
     println!("  • Memory-mapped I/O for efficient loading");
     println!("  • Zero-copy deserialization");
     println!("  • Automatic dtype conversion (f32, f16, i32, u8)");
     println!("  • Batch loading of multiple tensors");
     println!();
-    
+
     Ok(())
 }
 
 fn demo_downloader() -> Result<()> {
     println!("⬇️  Model Downloader Demo");
     println!("─────────────────────────\n");
-    
+
     let downloader = ModelDownloader::with_defaults()?;
-    
+
     println!("Download configuration:");
-    println!("  Cache directory: {:?}", std::env::temp_dir().join("sutraworks/models"));
+    println!(
+        "  Cache directory: {:?}",
+        std::env::temp_dir().join("sutraworks/models")
+    );
     println!("  Verify checksums: enabled");
     println!("  Progress display: enabled");
     println!("  Max retries: 3");
     println!();
-    
+
     println!("Example download:");
     println!("  downloader.download_hf(");
     println!("      \"BlinkDL/rwkv-4-pile-169m\",");
@@ -105,7 +109,7 @@ fn demo_downloader() -> Result<()> {
     println!("      Some(\"main\")");
     println!("  )?;");
     println!();
-    
+
     println!("Features:");
     println!("  • HuggingFace Hub integration");
     println!("  • Automatic caching");
@@ -113,12 +117,12 @@ fn demo_downloader() -> Result<()> {
     println!("  • Progress bar with download speed");
     println!("  • Retry logic with exponential backoff");
     println!();
-    
+
     // Show cached path example
     let cached = downloader.cached_path("test/model", "weights.safetensors", Some("main"));
     println!("Cached path example: {:?}", cached);
     println!();
-    
+
     Ok(())
 }
 

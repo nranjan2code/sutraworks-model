@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
 use crate::tensor::Tensor;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Model configuration metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,7 +31,7 @@ impl ModelConfig {
             metadata: HashMap::new(),
         }
     }
-    
+
     /// Estimate memory usage in bytes
     pub fn estimate_memory(&self) -> usize {
         // Rough estimate: hidden_size^2 * num_layers * 4 bytes (f32)
@@ -53,19 +53,19 @@ impl ModelWeights {
             config,
         }
     }
-    
+
     pub fn add_tensor(&mut self, name: impl Into<String>, tensor: Tensor) {
         self.tensors.insert(name.into(), tensor);
     }
-    
+
     pub fn get_tensor(&self, name: &str) -> Option<&Tensor> {
         self.tensors.get(name)
     }
-    
+
     pub fn total_parameters(&self) -> usize {
         self.tensors.values().map(|t| t.data().len()).sum()
     }
-    
+
     pub fn total_memory(&self) -> usize {
         self.tensors.values().map(|t| t.memory_usage()).sum()
     }

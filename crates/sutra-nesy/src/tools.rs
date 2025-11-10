@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use sutra_core::{Result, SutraError};
 
 /// Tool trait for symbolic computation
@@ -28,27 +28,26 @@ impl ToolRegistry {
         let mut registry = Self {
             tools: HashMap::new(),
         };
-        
+
         // Register built-in tools
         registry.register("calculator", Box::new(Calculator));
         registry.register("python", Box::new(PythonExecutor));
         registry.register("logic_solver", Box::new(LogicSolver));
-        
+
         registry
     }
-    
+
     pub fn register(&mut self, name: impl Into<String>, tool: Box<dyn Tool>) {
         self.tools.insert(name.into(), tool);
     }
-    
+
     pub fn get(&self, name: &str) -> Result<&dyn Tool> {
-        self.tools.get(name)
+        self.tools
+            .get(name)
             .map(|b| b.as_ref())
-            .ok_or_else(|| SutraError::Other(
-                anyhow::anyhow!("Tool '{}' not found", name)
-            ))
+            .ok_or_else(|| SutraError::Other(anyhow::anyhow!("Tool '{}' not found", name)))
     }
-    
+
     pub fn list(&self) -> Vec<&str> {
         self.tools.keys().map(|s| s.as_str()).collect()
     }
@@ -67,11 +66,11 @@ impl Tool for Calculator {
     fn name(&self) -> &str {
         "calculator"
     }
-    
+
     fn description(&self) -> &str {
         "Performs exact arithmetic operations"
     }
-    
+
     fn execute(&self, args: &[String]) -> Result<ToolResult> {
         if args.is_empty() {
             return Ok(ToolResult {
@@ -81,7 +80,7 @@ impl Tool for Calculator {
                 verified: false,
             });
         }
-        
+
         // In real implementation, parse and evaluate expression
         // For now, return placeholder
         Ok(ToolResult {
@@ -100,11 +99,11 @@ impl Tool for PythonExecutor {
     fn name(&self) -> &str {
         "python"
     }
-    
+
     fn description(&self) -> &str {
         "Executes Python code for complex computations"
     }
-    
+
     fn execute(&self, args: &[String]) -> Result<ToolResult> {
         if args.is_empty() {
             return Ok(ToolResult {
@@ -114,12 +113,12 @@ impl Tool for PythonExecutor {
                 verified: false,
             });
         }
-        
+
         // In real implementation:
         // 1. Run Python in sandboxed environment
         // 2. Capture stdout/stderr
         // 3. Return result
-        
+
         Ok(ToolResult {
             tool: self.name().to_string(),
             output: "Execution complete".to_string(),
@@ -136,17 +135,17 @@ impl Tool for LogicSolver {
     fn name(&self) -> &str {
         "logic_solver"
     }
-    
+
     fn description(&self) -> &str {
         "Solves logical formulas and proves theorems"
     }
-    
-    fn execute(&self, args: &[String]) -> Result<ToolResult> {
+
+    fn execute(&self, _args: &[String]) -> Result<ToolResult> {
         // In real implementation:
         // - Parse logical formula
         // - Use SAT solver or theorem prover
         // - Return proof or counterexample
-        
+
         Ok(ToolResult {
             tool: self.name().to_string(),
             output: "Valid".to_string(),
@@ -164,17 +163,17 @@ mod tests {
     fn test_tool_registry() {
         let registry = ToolRegistry::new();
         let tools = registry.list();
-        
+
         assert!(tools.contains(&"calculator"));
         assert!(tools.contains(&"python"));
         assert!(tools.contains(&"logic_solver"));
     }
-    
+
     #[test]
     fn test_calculator() {
         let calc = Calculator;
         let result = calc.execute(&["2 + 2".to_string()]).unwrap();
-        
+
         assert!(result.success);
         assert!(result.verified);
     }

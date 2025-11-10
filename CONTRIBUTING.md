@@ -32,6 +32,7 @@ Thank you for your interest in contributing to SutraWorks Model! This document p
 5. Run tests to ensure everything works:
    ```bash
    cargo test --all
+   # Should see: 51 tests passing
    ```
 
 ## 🏗️ Project Structure
@@ -40,15 +41,16 @@ The project is organized as a Cargo workspace with 9 crates:
 
 ```
 crates/
-├── sutra-core/          # Foundation: tensors, errors, traits
-├── sutra-quantize/      # AWQ 4-bit quantization
-├── sutra-peft/          # LoRA/QLoRA fine-tuning
-├── sutra-rwkv/          # RWKV architecture
-├── sutra-mamba/         # Mamba state space models
-├── sutra-nesy/          # Neuro-symbolic AI
-├── sutra-loader/        # Model loading (safetensors)
-├── sutra-tokenizer/     # Tokenization (BPE, WordPiece, Unigram)
-└── sutra-training/      # Training infrastructure
+├── sutra-core/          # Foundation: tensors, errors, traits (7 tests)
+├── sutra-quantize/      # AWQ 4-bit quantization (2 tests)
+├── sutra-peft/          # LoRA/QLoRA fine-tuning (5 tests)
+├── sutra-rwkv/          # RWKV architecture (3 tests)
+├── sutra-mamba/         # Mamba state space models (3 tests)
+├── sutra-nesy/          # Neuro-symbolic AI (4 tests)
+├── sutra-loader/        # Model loading (safetensors) (3 tests)
+├── sutra-tokenizer/     # Tokenization (BPE, WordPiece, Unigram) (13 tests)
+├── sutra-training/      # Training infrastructure (3 tests)
+└── tests/               # Integration tests (5 tests)
 ```
 
 ## 📝 Development Workflow

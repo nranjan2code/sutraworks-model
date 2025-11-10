@@ -1,20 +1,20 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
 use crate::error::Result;
 use crate::vocab::Vocab;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// BPE (Byte Pair Encoding) tokenizer configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BpeConfig {
     /// Vocabulary
     pub vocab: Vocab,
-    
+
     /// Merge rules (pair -> merged token)
     pub merges: Vec<(String, String)>,
-    
+
     /// Unknown token
     pub unk_token: String,
-    
+
     /// Byte-level encoding
     pub byte_level: bool,
 }
@@ -31,14 +31,14 @@ impl Default for BpeConfig {
 }
 
 /// Byte Pair Encoding tokenizer
-/// 
+///
 /// BPE iteratively merges the most frequent pair of bytes/characters.
 /// Used by GPT-2, GPT-3, and many modern LLMs.
-/// 
+///
 /// # Example
 /// ```no_run
 /// use sutra_tokenizer::BpeTokenizer;
-/// 
+///
 /// let tokenizer = BpeTokenizer::from_file("vocab.json", "merges.txt")?;
 /// let tokens = tokenizer.encode("Hello, world!")?;
 /// let text = tokenizer.decode(&tokens)?;
@@ -60,7 +60,7 @@ impl BpeTokenizer {
             .enumerate()
             .map(|(i, (a, b))| ((a.clone(), b.clone()), i))
             .collect();
-        
+
         let (byte_encoder, byte_decoder) = if config.byte_level {
             let encoder = Self::bytes_to_unicode();
             let decoder = encoder.iter().map(|(&k, &v)| (v, k)).collect();
@@ -68,7 +68,7 @@ impl BpeTokenizer {
         } else {
             (None, None)
         };
-        
+
         Self {
             config,
             merge_ranks,
@@ -76,11 +76,11 @@ impl BpeTokenizer {
             byte_decoder,
         }
     }
-    
+
     /// Load BPE tokenizer from vocabulary and merges files
     pub fn from_file(vocab_path: &str, merges_path: &str) -> Result<Self> {
         let vocab = Vocab::from_file(vocab_path)?;
-        
+
         // Load merges
         let merges_content = std::fs::read_to_string(merges_path)?;
         let merges: Vec<(String, String)> = merges_content
@@ -95,22 +95,22 @@ impl BpeTokenizer {
                 }
             })
             .collect();
-        
+
         let config = BpeConfig {
             vocab,
             merges,
             unk_token: "<unk>".to_string(),
             byte_level: true,
         };
-        
+
         Ok(Self::new(config))
     }
-    
+
     /// Encode text to token IDs
     pub fn encode(&self, text: &str) -> Result<Vec<u32>> {
         let words = self.pre_tokenize(text);
         let mut tokens = Vec::new();
-        
+
         for word in words {
             let word_tokens = self.bpe(&word);
             for token in word_tokens {
@@ -121,14 +121,14 @@ impl BpeTokenizer {
                 }
             }
         }
-        
+
         Ok(tokens)
     }
-    
+
     /// Decode token IDs to text
     pub fn decode(&self, tokens: &[u32]) -> Result<String> {
         let mut text = String::new();
-        
+
         for &token_id in tokens {
             if let Some(token) = self.config.vocab.get_token(token_id) {
                 if self.config.byte_level {
@@ -147,10 +147,10 @@ impl BpeTokenizer {
                 }
             }
         }
-        
+
         Ok(text)
     }
-    
+
     /// Pre-tokenize text (split into words)
     fn pre_tokenize(&self, text: &str) -> Vec<String> {
         if self.config.byte_level {
@@ -170,20 +170,20 @@ impl BpeTokenizer {
             text.split_whitespace().map(|s| s.to_string()).collect()
         }
     }
-    
+
     /// Apply BPE algorithm to a word
     fn bpe(&self, word: &str) -> Vec<String> {
         if word.is_empty() {
             return vec![];
         }
-        
+
         let mut word_chars: Vec<String> = word.chars().map(|c| c.to_string()).collect();
-        
+
         loop {
             // Find the pair with minimum rank
             let mut min_pair = None;
             let mut min_rank = usize::MAX;
-            
+
             for i in 0..word_chars.len().saturating_sub(1) {
                 let pair = (word_chars[i].clone(), word_chars[i + 1].clone());
                 if let Some(&rank) = self.merge_ranks.get(&pair) {
@@ -193,12 +193,12 @@ impl BpeTokenizer {
                     }
                 }
             }
-            
+
             // If no more merges possible, break
             if min_pair.is_none() {
                 break;
             }
-            
+
             // Perform the merge
             if let Some((pos, (first, second))) = min_pair {
                 let merged = format!("{}{}", first, second);
@@ -206,15 +206,15 @@ impl BpeTokenizer {
                 word_chars.remove(pos + 1);
             }
         }
-        
+
         word_chars
     }
-    
+
     /// Create byte-to-unicode mapping for byte-level BPE
     fn bytes_to_unicode() -> HashMap<u8, char> {
         let mut byte_encoder = HashMap::new();
         let mut n = 0;
-        
+
         // Printable ASCII
         for b in 33..=126 {
             byte_encoder.insert(b, char::from_u32(b as u32).unwrap());
@@ -225,7 +225,7 @@ impl BpeTokenizer {
         for b in 174..=255 {
             byte_encoder.insert(b, char::from_u32(b as u32).unwrap());
         }
-        
+
         // Fill in remaining bytes with shifted unicode
         for b in 0..=255u8 {
             if !byte_encoder.contains_key(&b) {
@@ -233,10 +233,10 @@ impl BpeTokenizer {
                 n += 1;
             }
         }
-        
+
         byte_encoder
     }
-    
+
     /// Get vocabulary size
     pub fn vocab_size(&self) -> usize {
         self.config.vocab.size()
@@ -247,7 +247,7 @@ impl BpeTokenizer {
 mod tests {
     use super::*;
     use crate::vocab::VocabBuilder;
-    
+
     #[test]
     fn test_bpe_basic() {
         // Create a simple vocabulary
@@ -255,23 +255,23 @@ mod tests {
             .with_special_tokens(&["<unk>", "<pad>"])
             .with_tokens(&["h", "e", "l", "o", "he", "llo"])
             .build();
-        
+
         let merges = vec![
             ("h".to_string(), "e".to_string()),
             ("l".to_string(), "l".to_string()),
         ];
-        
+
         let config = BpeConfig {
             vocab,
             merges,
             unk_token: "<unk>".to_string(),
             byte_level: false,
         };
-        
+
         let tokenizer = BpeTokenizer::new(config);
         assert_eq!(tokenizer.vocab_size(), 8);
     }
-    
+
     #[test]
     fn test_byte_encoder() {
         let encoder = BpeTokenizer::bytes_to_unicode();

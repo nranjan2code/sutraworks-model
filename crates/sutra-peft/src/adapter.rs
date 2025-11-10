@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use sutra_core::Result;
 
 /// Represents a trainable adapter module
@@ -20,7 +20,7 @@ impl Adapter {
             target_modules: Vec::new(),
         }
     }
-    
+
     pub fn with_targets(mut self, targets: Vec<String>) -> Self {
         self.target_modules = targets;
         self
@@ -40,31 +40,33 @@ impl AdapterManager {
             active_adapter: None,
         }
     }
-    
+
     /// Add a new adapter
     pub fn add_adapter(&mut self, adapter: Adapter) {
         let name = adapter.name.clone();
         self.adapters.insert(name, adapter);
     }
-    
+
     /// Set the active adapter
     pub fn set_active(&mut self, name: impl Into<String>) -> Result<()> {
         let name = name.into();
         if !self.adapters.contains_key(&name) {
-            return Err(sutra_core::SutraError::Other(
-                anyhow::anyhow!("Adapter '{}' not found", name)
-            ));
+            return Err(sutra_core::SutraError::Other(anyhow::anyhow!(
+                "Adapter '{}' not found",
+                name
+            )));
         }
         self.active_adapter = Some(name);
         Ok(())
     }
-    
+
     /// Get the active adapter
     pub fn active(&self) -> Option<&Adapter> {
-        self.active_adapter.as_ref()
+        self.active_adapter
+            .as_ref()
             .and_then(|name| self.adapters.get(name))
     }
-    
+
     /// List all adapter names
     pub fn list_adapters(&self) -> Vec<&str> {
         self.adapters.keys().map(|s| s.as_str()).collect()

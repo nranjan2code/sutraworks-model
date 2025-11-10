@@ -1,5 +1,8 @@
+pub mod error;
+pub mod gradient;
+pub mod loss;
 /// Training infrastructure for SutraWorks models
-/// 
+///
 /// Features:
 /// - Optimizers (Adam, SGD, AdamW)
 /// - Learning rate schedulers
@@ -7,25 +10,21 @@
 /// - Loss functions
 /// - Training loops with checkpointing
 /// - Mixed precision training support
-
 pub mod optimizer;
 pub mod scheduler;
-pub mod loss;
 pub mod trainer;
-pub mod gradient;
-pub mod error;
 
-pub use optimizer::{Optimizer, Adam, AdamConfig, Sgd, SgdConfig, AdamW};
-pub use scheduler::{LRScheduler, CosineScheduler, LinearScheduler};
-pub use loss::{Loss, CrossEntropyLoss, MSELoss};
-pub use trainer::{Trainer, TrainerConfig, TrainingState};
+pub use error::{Result, TrainingError};
 pub use gradient::GradientAccumulator;
-pub use error::{TrainingError, Result};
+pub use loss::{CrossEntropyLoss, Loss, MSELoss};
+pub use optimizer::{Adam, AdamConfig, AdamW, Optimizer, Sgd, SgdConfig};
+pub use scheduler::{CosineScheduler, LRScheduler, LinearScheduler};
+pub use trainer::{Trainer, TrainerConfig, TrainingState};
 
 pub mod prelude {
-    pub use crate::{Trainer, TrainerConfig, TrainingState};
     pub use crate::{Adam, AdamConfig, Sgd, SgdConfig};
-    pub use crate::{LRScheduler, CosineScheduler, LinearScheduler};
-    pub use crate::{Loss, CrossEntropyLoss, MSELoss};
-    pub use crate::{TrainingError, Result};
+    pub use crate::{CosineScheduler, LRScheduler, LinearScheduler};
+    pub use crate::{CrossEntropyLoss, Loss, MSELoss};
+    pub use crate::{Result, TrainingError};
+    pub use crate::{Trainer, TrainerConfig, TrainingState};
 }

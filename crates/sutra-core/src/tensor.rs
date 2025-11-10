@@ -1,6 +1,6 @@
+use crate::error::{Result, SutraError};
 use ndarray::{Array, ArrayD, IxDyn};
 use serde::{Deserialize, Serialize};
-use crate::error::{Result, SutraError};
 
 /// Supported data types for tensors
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -10,7 +10,7 @@ pub enum DType {
     I32,
     I8,
     U8,
-    I4,  // 4-bit integer for quantization
+    I4, // 4-bit integer for quantization
 }
 
 impl DType {
@@ -39,51 +39,53 @@ impl Tensor {
             name: None,
         }
     }
-    
+
     pub fn zeros(shape: &[usize], dtype: DType) -> Self {
         let data = ArrayD::zeros(IxDyn(shape));
         Self::new(data, dtype)
     }
-    
+
     pub fn from_slice(data: &[f32], shape: &[usize], dtype: DType) -> Result<Self> {
         let total_size: usize = shape.iter().product();
         if data.len() != total_size {
-            return Err(SutraError::InvalidShape(
-                format!("Data length {} doesn't match shape {:?}", data.len(), shape)
-            ));
+            return Err(SutraError::InvalidShape(format!(
+                "Data length {} doesn't match shape {:?}",
+                data.len(),
+                shape
+            )));
         }
-        
+
         let arr = Array::from_shape_vec(IxDyn(shape), data.to_vec())
             .map_err(|e| SutraError::InvalidShape(e.to_string()))?;
-        
+
         Ok(Self::new(arr, dtype))
     }
-    
+
     pub fn shape(&self) -> &[usize] {
         self.data.shape()
     }
-    
+
     pub fn dtype(&self) -> DType {
         self.dtype
     }
-    
+
     pub fn data(&self) -> &ArrayD<f32> {
         &self.data
     }
-    
+
     pub fn data_mut(&mut self) -> &mut ArrayD<f32> {
         &mut self.data
     }
-    
+
     pub fn with_name(mut self, name: impl Into<String>) -> Self {
         self.name = Some(name.into());
         self
     }
-    
+
     pub fn name(&self) -> Option<&str> {
         self.name.as_deref()
     }
-    
+
     /// Memory usage in bytes
     pub fn memory_usage(&self) -> usize {
         self.data.len() * self.dtype.size_bytes()
@@ -100,15 +102,15 @@ impl<'a> TensorView<'a> {
     pub fn new(data: &'a ArrayD<f32>, dtype: DType) -> Self {
         Self { data, dtype }
     }
-    
+
     pub fn shape(&self) -> &[usize] {
         self.data.shape()
     }
-    
+
     pub fn dtype(&self) -> DType {
         self.dtype
     }
-    
+
     pub fn data(&self) -> &ArrayD<f32> {
         self.data
     }
@@ -125,7 +127,7 @@ mod tests {
         assert_eq!(tensor.shape(), &[2, 2]);
         assert_eq!(tensor.dtype(), DType::F32);
     }
-    
+
     #[test]
     fn test_tensor_memory() {
         let tensor = Tensor::zeros(&[100, 100], DType::F32);

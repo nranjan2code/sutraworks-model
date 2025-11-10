@@ -1,7 +1,7 @@
-/// Loss functions
+//! Loss functions
 
-use ndarray::ArrayD;
 use crate::error::Result;
+use ndarray::ArrayD;
 
 pub trait Loss {
     fn compute(&self, predictions: &ArrayD<f32>, targets: &ArrayD<f32>) -> Result<f32>;
@@ -19,7 +19,7 @@ impl Loss for CrossEntropyLoss {
         }
         Ok(loss / predictions.len() as f32)
     }
-    
+
     fn backward(&self, predictions: &ArrayD<f32>, targets: &ArrayD<f32>) -> Result<ArrayD<f32>> {
         let scale = predictions.len() as f32;
         Ok((predictions - targets).mapv(|x| x / scale))
@@ -34,7 +34,7 @@ impl Loss for MSELoss {
         let diff = predictions - targets;
         Ok(diff.mapv(|x| x * x).sum() / predictions.len() as f32)
     }
-    
+
     fn backward(&self, predictions: &ArrayD<f32>, targets: &ArrayD<f32>) -> Result<ArrayD<f32>> {
         let scale = predictions.len() as f32;
         Ok((predictions - targets).mapv(|x| x * 2.0 / scale))

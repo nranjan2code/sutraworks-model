@@ -1,4 +1,4 @@
-/// Text normalizers for preprocessing
+//! Text normalizers for preprocessing
 
 use unicode_normalization::UnicodeNormalization;
 
@@ -30,9 +30,7 @@ pub struct StripAccentsNormalizer;
 
 impl Normalizer for StripAccentsNormalizer {
     fn normalize(&self, text: &str) -> String {
-        text.nfd()
-            .filter(|c| !c.is_mark())
-            .collect()
+        text.nfd().filter(|c| !c.is_mark()).collect()
     }
 }
 
@@ -58,13 +56,13 @@ impl CharExt for char {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_lowercase() {
         let normalizer = LowercaseNormalizer;
         assert_eq!(normalizer.normalize("Hello World"), "hello world");
     }
-    
+
     #[test]
     fn test_identity() {
         let normalizer = IdentityNormalizer;

@@ -1,16 +1,16 @@
+pub mod error;
+pub mod model;
+pub mod ops;
 /// Core types and utilities shared across all SutraWorks crates
 pub mod tensor;
-pub mod model;
-pub mod error;
-pub mod ops;
 
-pub use tensor::{Tensor, TensorView, DType};
+pub use error::{Result, SutraError};
 pub use model::{ModelConfig, ModelWeights};
-pub use error::{SutraError, Result};
+pub use tensor::{DType, Tensor, TensorView};
 
 /// Prelude for convenient imports
 pub mod prelude {
-    pub use crate::{Tensor, TensorView, DType, ModelConfig, ModelWeights};
-    pub use crate::{SutraError, Result};
     pub use crate::ops;
+    pub use crate::{DType, ModelConfig, ModelWeights, Tensor, TensorView};
+    pub use crate::{Result, SutraError};
 }

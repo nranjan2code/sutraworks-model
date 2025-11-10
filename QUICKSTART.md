@@ -18,20 +18,20 @@
 3. **Run Tests**:
    ```bash
    cargo test --all
+   # ✅ 51 tests should pass
    ```
 
 ## Running Examples
 
-### 1. End-to-End Pipeline (NEW!) ⭐
-Experience the complete AI workflow in action:
+### 1. End-to-End Pipeline (⭐ Complete Workflow)
+Experience the full AI stack from tokenization to inference:
 ```bash
 cargo run --example end_to_end --release
 ```
 
-**Output**: Demonstrates model registry, safetensors loading, HuggingFace downloads.
-
-### 3. Quantization Demo
-See 4-bit model compression in action:U)
+**What it does**:
+- ✅ BPE tokenization (GPT-2 style)
+- ✅ Embedding lookup and tensor ops
 - ✅ 4-bit quantization (6x compression!)
 - ✅ RWKV model inference
 - ✅ Token sampling and decoding
@@ -46,7 +46,7 @@ cargo run --example model_loader --release
 
 **Output**: Demonstrates model registry, safetensors loading, HuggingFace downloads.
 
-### 2. Quantization Demo
+### 3. Quantization Demo
 See 4-bit model compression in action:
 ```bash
 cargo run --example quantization_demo --release

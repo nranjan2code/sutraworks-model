@@ -34,9 +34,9 @@ impl PeftTrainer {
     pub fn new(config: TrainingConfig) -> Self {
         Self { config }
     }
-    
+
     /// Train adapter on dataset
-    pub fn train(&self, /* model, dataset */) -> Result<TrainingMetrics> {
+    pub fn train(&self /* model, dataset */) -> Result<TrainingMetrics> {
         // Training loop implementation would go here
         // For now, return dummy metrics
         Ok(TrainingMetrics {

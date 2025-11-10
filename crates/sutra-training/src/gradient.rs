@@ -1,7 +1,7 @@
-/// Gradient accumulation utilities
+//! Gradient accumulation utilities
 
-use ndarray::ArrayD;
 use crate::error::Result;
+use ndarray::ArrayD;
 
 pub struct GradientAccumulator {
     gradients: Vec<ArrayD<f32>>,
@@ -17,7 +17,7 @@ impl GradientAccumulator {
             current_step: 0,
         }
     }
-    
+
     pub fn accumulate(&mut self, grads: &[ArrayD<f32>]) -> Result<()> {
         if self.gradients.is_empty() {
             self.gradients = grads.iter().map(|g| g.clone()).collect();
@@ -29,18 +29,19 @@ impl GradientAccumulator {
         self.current_step += 1;
         Ok(())
     }
-    
+
     pub fn should_step(&self) -> bool {
         self.current_step >= self.accumulation_steps
     }
-    
+
     pub fn get_accumulated(&mut self) -> Vec<ArrayD<f32>> {
         let scale = 1.0 / self.accumulation_steps as f32;
-        let result: Vec<ArrayD<f32>> = self.gradients
+        let result: Vec<ArrayD<f32>> = self
+            .gradients
             .iter()
             .map(|g| g.mapv(|x| x * scale))
             .collect();
-        
+
         self.gradients.clear();
         self.current_step = 0;
         result

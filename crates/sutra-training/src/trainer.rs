@@ -1,11 +1,8 @@
-/// Training loop implementation
+//! Training loop implementation
 
-use std::path::Path;
-use serde::{Deserialize, Serialize};
 use crate::error::{Result, TrainingError};
-use crate::optimizer::Optimizer;
-use crate::scheduler::LRScheduler;
-use crate::loss::Loss;
+use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrainerConfig {
@@ -69,31 +66,31 @@ pub struct Trainer {
 impl Trainer {
     pub fn new(config: TrainerConfig) -> Self {
         std::fs::create_dir_all(&config.output_dir).ok();
-        
+
         Self {
             config,
             state: TrainingState::new(),
         }
     }
-    
+
     pub fn state(&self) -> &TrainingState {
         &self.state
     }
-    
+
     pub fn save_checkpoint(&self, path: impl AsRef<Path>) -> Result<()> {
         let json = serde_json::to_string_pretty(&self.state)
             .map_err(|e| TrainingError::Checkpoint(e.to_string()))?;
         std::fs::write(path, json)?;
         Ok(())
     }
-    
+
     pub fn load_checkpoint(&mut self, path: impl AsRef<Path>) -> Result<()> {
         let json = std::fs::read_to_string(path)?;
-        self.state = serde_json::from_str(&json)
-            .map_err(|e| TrainingError::Checkpoint(e.to_string()))?;
+        self.state =
+            serde_json::from_str(&json).map_err(|e| TrainingError::Checkpoint(e.to_string()))?;
         Ok(())
     }
-    
+
     pub fn log(&self, message: impl AsRef<str>) {
         println!("[Step {}] {}", self.state.global_step, message.as_ref());
     }
@@ -102,7 +99,7 @@ impl Trainer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_trainer_creation() {
         let config = TrainerConfig::default();

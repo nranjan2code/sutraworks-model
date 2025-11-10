@@ -1,7 +1,7 @@
+use crate::executor::ToolExecutor;
+use crate::tools::{ToolRegistry, ToolResult};
 use serde::{Deserialize, Serialize};
 use sutra_core::Result;
-use crate::tools::{ToolRegistry, ToolResult};
-use crate::executor::ToolExecutor;
 
 /// Configuration for neuro-symbolic agent
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,7 +25,7 @@ impl Default for AgentConfig {
 }
 
 /// Neuro-symbolic agent combining neural LLM with symbolic tools
-/// 
+///
 /// Architecture:
 /// 1. Neural model generates plan/reasoning
 /// 2. Identifies when symbolic computation needed
@@ -41,75 +41,74 @@ impl NesyAgent {
     pub fn new(config: AgentConfig) -> Self {
         let tool_registry = ToolRegistry::new();
         let executor = ToolExecutor::new();
-        
+
         Self {
             config,
             tool_registry,
             executor,
         }
     }
-    
+
     /// Process query using neuro-symbolic reasoning
-    /// 
+    ///
     /// # Arguments
     /// * `query` - User query
     /// * `neural_model` - Small local LLM for reasoning
-    /// 
+    ///
     /// # Returns
     /// * Response with verified facts
+    #[allow(unused_variables)]
     pub fn process(&self, query: &str) -> Result<Response> {
         // 1. Use neural model to understand query and plan
         let plan = self.plan_solution(query)?;
-        
+
         // 2. Execute plan with symbolic tools
         let results = self.execute_plan(&plan)?;
-        
+
         // 3. Verify results symbolically
         if self.config.verify_outputs {
             self.verify_results(&results)?;
         }
-        
+
         // 4. Generate natural language response
         let response = self.generate_response(query, &results)?;
-        
+
         Ok(response)
     }
-    
-    fn plan_solution(&self, query: &str) -> Result<Plan> {
+
+    fn plan_solution(&self, _query: &str) -> Result<Plan> {
         // Neural model analyzes query and determines:
         // - What tools are needed
         // - In what order
         // - What intermediate results to compute
-        
+
         Ok(Plan {
-            steps: vec![
-                PlanStep {
-                    tool: "calculator".to_string(),
-                    args: vec!["2 + 2".to_string()],
-                }
-            ],
+            steps: vec![PlanStep {
+                tool: "calculator".to_string(),
+                args: vec!["2 + 2".to_string()],
+            }],
         })
     }
-    
+
     fn execute_plan(&self, plan: &Plan) -> Result<Vec<ToolResult>> {
         let mut results = Vec::new();
-        
+
         for step in &plan.steps {
             let tool = self.tool_registry.get(&step.tool)?;
             let result = self.executor.execute(tool, &step.args)?;
             results.push(result);
         }
-        
+
         Ok(results)
     }
-    
-    fn verify_results(&self, results: &[ToolResult]) -> Result<()> {
+
+    fn verify_results(&self, _results: &[ToolResult]) -> Result<()> {
         // Symbolic verification ensures correctness
         // E.g., check math invariants, logical consistency
         Ok(())
     }
-    
-    fn generate_response(&self, query: &str, results: &[ToolResult]) -> Result<Response> {
+
+    fn generate_response(&self, _query: &str, results: &[ToolResult]) -> Result<Response> {
         // Neural model formats verified results into natural language
         Ok(Response {
             text: format!("Results: {:?}", results),
@@ -117,7 +116,7 @@ impl NesyAgent {
             tool_calls: results.len(),
         })
     }
-    
+
     /// Register a new tool
     pub fn register_tool(&mut self, name: impl Into<String>, tool: Box<dyn crate::tools::Tool>) {
         self.tool_registry.register(name, tool);

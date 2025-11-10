@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
-use sutra_core::{Result, SutraError};
 use crate::layer::RwkvLayer;
 use crate::state::RwkvState;
+use serde::{Deserialize, Serialize};
+use sutra_core::Result;
 
 /// RWKV model configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,21 +24,22 @@ impl RwkvConfig {
             layer_norm_eps: 1e-5,
         }
     }
-    
+
     /// Estimate memory usage for inference
     pub fn estimate_memory(&self) -> usize {
         // RWKV has constant memory complexity
         // State: hidden_size * num_layers * 2 (for att and ffn states)
         let state_mem = self.hidden_size * self.num_layers * 2 * std::mem::size_of::<f32>();
-        
+
         // Weights: rough estimate
         let weight_mem = self.hidden_size * self.hidden_size * self.num_layers * 4 * 4;
-        
+
         state_mem + weight_mem
     }
 }
 
 /// RWKV model for efficient inference
+#[allow(dead_code)]
 pub struct RwkvModel {
     config: RwkvConfig,
     layers: Vec<RwkvLayer>,
@@ -47,47 +48,45 @@ pub struct RwkvModel {
 impl RwkvModel {
     pub fn new(config: RwkvConfig) -> Result<Self> {
         let mut layers = Vec::with_capacity(config.num_layers);
-        
+
         for layer_idx in 0..config.num_layers {
             layers.push(RwkvLayer::new(config.hidden_size, layer_idx)?);
         }
-        
-        Ok(Self {
-            config,
-            layers,
-        })
+
+        Ok(Self { config, layers })
     }
-    
+
     /// Forward pass through the model
-    /// 
+    ///
     /// # Arguments
     /// * `input` - Input token IDs [batch_size, seq_len]
     /// * `state` - Optional previous state for sequential generation
-    /// 
+    ///
     /// # Returns
     /// * Logits [batch_size, seq_len, vocab_size]
     /// * Updated state for next step
     pub fn forward(
         &self,
-        input: &[usize],
+        _input: &[usize],
         state: Option<RwkvState>,
     ) -> Result<(Vec<f32>, RwkvState)> {
-        let mut state = state.unwrap_or_else(|| RwkvState::new(&self.config));
-        
+        let state = state.unwrap_or_else(|| RwkvState::new(&self.config));
+
         // In a real implementation, this would:
         // 1. Embed tokens using embedding layer
         // 2. Process through RWKV layers sequentially
         // 3. Apply final layer norm
         // 4. Project to vocabulary with output layer
         // 5. Return logits
-        
+
         // For now, create simplified logits (uniform distribution)
         let logits = vec![1.0 / self.config.vocab_size as f32; self.config.vocab_size];
-        
+
         Ok((logits, state))
     }
-    
+
     /// Generate text autoregressively
+    #[allow(unused_variables)]
     pub fn generate(
         &self,
         prompt: &[usize],
@@ -96,33 +95,34 @@ impl RwkvModel {
     ) -> Result<Vec<usize>> {
         let mut tokens = prompt.to_vec();
         let mut state = RwkvState::new(&self.config);
-        
+
         for _ in 0..max_tokens {
             let (logits, new_state) = self.forward(&tokens, Some(state))?;
             state = new_state;
-            
+
             // Sample next token (placeholder)
             let next_token = self.sample_token(&logits, temperature);
             tokens.push(next_token);
-            
+
             // Check for EOS token
             if next_token == 0 {
                 break;
             }
         }
-        
+
         Ok(tokens)
     }
-    
-    fn sample_token(&self, logits: &[f32], temperature: f32) -> usize {
+
+    fn sample_token(&self, logits: &[f32], _temperature: f32) -> usize {
         // Placeholder: return token with highest logit
-        logits.iter()
+        logits
+            .iter()
             .enumerate()
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .map(|(idx, _)| idx)
             .unwrap_or(0)
     }
-    
+
     pub fn config(&self) -> &RwkvConfig {
         &self.config
     }
@@ -138,15 +138,15 @@ mod tests {
         let model = RwkvModel::new(config).unwrap();
         assert_eq!(model.layers.len(), 12);
     }
-    
+
     #[test]
     fn test_memory_efficiency() {
         let config = RwkvConfig::new(24, 1024, 50000);
         let memory = config.estimate_memory();
         let memory_gb = memory as f64 / 1_073_741_824.0;
-        
+
         println!("RWKV-24L-1024D estimated memory: {:.2} GB", memory_gb);
-        
+
         // RWKV should fit comfortably in 16GB
         assert!(memory_gb < 10.0);
     }

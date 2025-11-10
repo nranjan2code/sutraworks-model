@@ -2,6 +2,7 @@ use ndarray::Array1;
 use sutra_core::Result;
 
 /// RWKV layer combining time-mixing and channel-mixing
+#[allow(dead_code)]
 pub struct RwkvLayer {
     hidden_size: usize,
     layer_idx: usize,
@@ -14,13 +15,14 @@ impl RwkvLayer {
             layer_idx,
         })
     }
-    
+
     /// Forward pass through RWKV layer
+    #[allow(unused_variables)]
     pub fn forward(&self, x: &Array1<f32>, state: &mut LayerState) -> Result<Array1<f32>> {
         // RWKV layer implements:
         // 1. Time-mixing (attention-like mechanism)
         // 2. Channel-mixing (FFN-like mechanism)
-        
+
         // Placeholder: identity function
         Ok(x.clone())
     }
