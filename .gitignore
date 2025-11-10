@@ -20,3 +20,10 @@ Thumbs.db
 *.bin
 *.gguf
 models/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.token
+.secrets/

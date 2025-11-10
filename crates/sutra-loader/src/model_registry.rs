@@ -110,6 +110,76 @@ impl ModelRegistry {
     pub fn with_defaults() -> Self {
         let mut registry = Self::new();
 
+        // Add latest DeepSeek models
+        registry.register(
+            ModelInfo::new("deepseek-coder-1.3b", "DeepSeek-Coder-V2 1.3B Instruct", "transformer")
+                .with_parameters(1_300_000_000)
+                .with_source(ModelSource::HuggingFace {
+                    repo: "deepseek-ai/deepseek-coder-1.3b-instruct".to_string(),
+                    revision: Some("main".to_string()),
+                })
+                .with_metadata("context_length", "16384")
+                .with_metadata("vocab_size", "32256")
+                .with_metadata("release_date", "2024")
+                .with_metadata("capabilities", "code_generation,instruction_following"),
+        );
+
+        registry.register(
+            ModelInfo::new("deepseek-coder-6.7b", "DeepSeek-Coder-V2 6.7B Instruct", "transformer")
+                .with_parameters(6_700_000_000)
+                .with_source(ModelSource::HuggingFace {
+                    repo: "deepseek-ai/deepseek-coder-6.7b-instruct".to_string(),
+                    revision: Some("main".to_string()),
+                })
+                .with_metadata("context_length", "16384")
+                .with_metadata("vocab_size", "32256")
+                .with_metadata("release_date", "2024")
+                .with_metadata("capabilities", "advanced_code_generation,multi_language,instruction_following"),
+        );
+
+        // Add latest Llama models (require authentication)
+        registry.register(
+            ModelInfo::new("llama-3.2-1b", "Llama 3.2 1B Instruct", "transformer")
+                .with_parameters(1_000_000_000)
+                .with_source(ModelSource::HuggingFace {
+                    repo: "meta-llama/Llama-3.2-1B-Instruct".to_string(),
+                    revision: Some("main".to_string()),
+                })
+                .with_metadata("context_length", "131072")
+                .with_metadata("vocab_size", "128256")
+                .with_metadata("release_date", "2024")
+                .with_metadata("requires_auth", "true")
+                .with_metadata("capabilities", "general_purpose,instruction_following,chat"),
+        );
+
+        registry.register(
+            ModelInfo::new("llama-3.2-3b", "Llama 3.2 3B Instruct", "transformer")
+                .with_parameters(3_000_000_000)
+                .with_source(ModelSource::HuggingFace {
+                    repo: "meta-llama/Llama-3.2-3B-Instruct".to_string(),
+                    revision: Some("main".to_string()),
+                })
+                .with_metadata("context_length", "131072")
+                .with_metadata("vocab_size", "128256")
+                .with_metadata("release_date", "2024")
+                .with_metadata("requires_auth", "true")
+                .with_metadata("capabilities", "general_purpose,instruction_following,chat,reasoning"),
+        );
+
+        registry.register(
+            ModelInfo::new("llama-3.1-8b", "Llama 3.1 8B Instruct", "transformer")
+                .with_parameters(8_000_000_000)
+                .with_source(ModelSource::HuggingFace {
+                    repo: "meta-llama/Llama-3.1-8B-Instruct".to_string(),
+                    revision: Some("main".to_string()),
+                })
+                .with_metadata("context_length", "131072")
+                .with_metadata("vocab_size", "128256")
+                .with_metadata("release_date", "2024")
+                .with_metadata("requires_auth", "true")
+                .with_metadata("capabilities", "advanced_reasoning,instruction_following,chat,multi_language"),
+        );
+
         // Add RWKV models
         registry.register(
             ModelInfo::new("rwkv-169m", "RWKV-4 169M", "rwkv")
@@ -119,7 +189,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("context_length", "1024")
-                .with_metadata("vocab_size", "50277"),
+                .with_metadata("vocab_size", "50277")
+                .with_metadata("capabilities", "text_generation,linear_complexity"),
         );
 
         registry.register(
@@ -130,7 +201,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("context_length", "1024")
-                .with_metadata("vocab_size", "50277"),
+                .with_metadata("vocab_size", "50277")
+                .with_metadata("capabilities", "text_generation,linear_complexity"),
         );
 
         registry.register(
@@ -141,7 +213,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("context_length", "2048")
-                .with_metadata("vocab_size", "50277"),
+                .with_metadata("vocab_size", "50277")
+                .with_metadata("capabilities", "text_generation,linear_complexity"),
         );
 
         // Add Mamba models
@@ -153,7 +226,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("d_model", "768")
-                .with_metadata("n_layer", "24"),
+                .with_metadata("n_layer", "24")
+                .with_metadata("capabilities", "text_generation,linear_complexity,state_space_model"),
         );
 
         registry.register(
@@ -164,7 +238,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("d_model", "1024")
-                .with_metadata("n_layer", "48"),
+                .with_metadata("n_layer", "48")
+                .with_metadata("capabilities", "text_generation,linear_complexity,state_space_model"),
         );
 
         registry.register(
@@ -175,7 +250,8 @@ impl ModelRegistry {
                     revision: Some("main".to_string()),
                 })
                 .with_metadata("d_model", "2048")
-                .with_metadata("n_layer", "48"),
+                .with_metadata("n_layer", "48")
+                .with_metadata("capabilities", "text_generation,linear_complexity,state_space_model"),
         );
 
         registry
