@@ -1,0 +1,56 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/sutra-quantize",
+    "crates/sutra-peft",
+    "crates/sutra-rwkv",
+    "crates/sutra-mamba",
+    "crates/sutra-nesy",
+    "crates/sutra-core",
+    "examples",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["SutraWorks"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sutraworks/model"
+
+[workspace.dependencies]
+# Core dependencies
+ndarray = "0.16"
+ndarray-linalg = "0.16"
+rayon = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Numerical computation
+num-traits = "0.2"
+rand = "0.8"
+rand_distr = "0.4"
+
+# Memory-mapped I/O for large models
+memmap2 = "0.9"
+
+# SIMD acceleration
+packed_simd = "0.3"
+
+# Internal crates
+sutra-core = { path = "crates/sutra-core" }
+sutra-quantize = { path = "crates/sutra-quantize" }
+sutra-peft = { path = "crates/sutra-peft" }
+sutra-rwkv = { path = "crates/sutra-rwkv" }
+sutra-mamba = { path = "crates/sutra-mamba" }
+sutra-nesy = { path = "crates/sutra-nesy" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1

@@ -1,0 +1,2 @@
+rust-analyzer.linkedProjects = []
+rust-analyzer.check.workspace = true

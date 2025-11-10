@@ -1,0 +1,34 @@
+[package]
+name = "examples"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+sutra-core = { workspace = true }
+sutra-quantize = { workspace = true }
+sutra-peft = { workspace = true }
+sutra-rwkv = { workspace = true }
+sutra-mamba = { workspace = true }
+sutra-nesy = { workspace = true }
+ndarray = { workspace = true }
+
+[[example]]
+name = "quantization_demo"
+path = "quantization_demo.rs"
+
+[[example]]
+name = "qlora_training"
+path = "qlora_training.rs"
+
+[[example]]
+name = "rwkv_inference"
+path = "rwkv_inference.rs"
+
+[[example]]
+name = "mamba_inference"
+path = "mamba_inference.rs"
+
+[[example]]
+name = "nesy_agent"
+path = "nesy_agent.rs"
