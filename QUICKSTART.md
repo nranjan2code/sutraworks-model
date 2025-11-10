@@ -22,31 +22,39 @@
 
 ## Running Examples
 
-### 1. Quantization Demo
+### 1. Model Loader (NEW!) ✨
+Load models from HuggingFace and safetensors:
+```bash
+cargo run --example model_loader --release
+```
+
+**Output**: Demonstrates model registry, safetensors loading, HuggingFace downloads.
+
+### 2. Quantization Demo
 See 4-bit model compression in action:
 ```bash
 cargo run --example quantization_demo --release
 ```
 
-**Output**: Demonstrates ~4x memory reduction with AWQ quantization.
+**Output**: Demonstrates ~6x memory reduction with AWQ quantization.
 
-### 2. QLoRA Fine-Tuning
+### 3. QLoRA Fine-Tuning
 Learn about parameter-efficient fine-tuning:
 ```bash
 cargo run --example qlora_training --release
 ```
 
-**Output**: Shows how to fine-tune 3B models with <8GB RAM.
+**Output**: Shows how to fine-tune 3B models with <8GB RAM using training infrastructure.
 
-### 3. RWKV Inference
+### 4. RWKV Inference
 Explore efficient RNN-based inference:
 ```bash
 cargo run --example rwkv_inference --release
 ```
 
-**Output**: Demonstrates constant memory, linear complexity inference.
+**Output**: Demonstrates constant memory, linear O(n) complexity inference.
 
-### 4. Mamba Inference
+### 5. Mamba Inference
 Experience 5x faster throughput:
 ```bash
 cargo run --example mamba_inference --release
@@ -54,13 +62,13 @@ cargo run --example mamba_inference --release
 
 **Output**: Shows linear-time state space model advantages.
 
-### 5. Neuro-Symbolic Agent
+### 6. Neuro-Symbolic Agent
 Build hybrid AI with verified reasoning:
 ```bash
 cargo run --example nesy_agent --release
 ```
 
-**Output**: Demonstrates combining neural nets with symbolic tools.
+**Output**: Demonstrates combining neural nets with symbolic tools for guaranteed correctness.
 
 ## Using in Your Project
 
@@ -68,20 +76,33 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
+# Core functionality
 sutra-core = { path = "path/to/sutraworks-model/crates/sutra-core" }
-sutra-quantize = { path = "path/to/sutraworks-model/crates/sutra-quantize" }
+
+# Model loading and tokenization
+sutra-loader = { path = "path/to/sutraworks-model/crates/sutra-loader" }
+sutra-tokenizer = { path = "path/to/sutraworks-model/crates/sutra-tokenizer" }
+
+# Training and optimization
+sutra-training = { path = "path/to/sutraworks-model/crates/sutra-training" }
 sutra-peft = { path = "path/to/sutraworks-model/crates/sutra-peft" }
+
+# Model architectures
 sutra-rwkv = { path = "path/to/sutraworks-model/crates/sutra-rwkv" }
 sutra-mamba = { path = "path/to/sutraworks-model/crates/sutra-mamba" }
+
+# Advanced features
+sutra-quantize = { path = "path/to/sutraworks-model/crates/sutra-quantize" }
 sutra-nesy = { path = "path/to/sutraworks-model/crates/sutra-nesy" }
 ```
 
 ## Next Steps
 
-1. **Download Models**: Get pre-trained RWKV or Mamba models from Hugging Face
-2. **Quantize**: Use `sutra-quantize` to compress to 4-bit
-3. **Fine-tune**: Specialize models with `sutra-peft` on your data
-4. **Deploy**: Run locally on your MacBook Air
+1. **Load Models**: Use `sutra-loader` to download from HuggingFace Hub
+2. **Tokenize Data**: Choose BPE, WordPiece, or Unigram from `sutra-tokenizer`
+3. **Train/Fine-tune**: Use `sutra-training` for optimizers and `sutra-peft` for QLoRA
+4. **Quantize**: Compress with `sutra-quantize` AWQ 4-bit for deployment
+5. **Deploy**: Run locally on your MacBook Air with efficient RWKV/Mamba models
 
 ## Resources
 
@@ -124,11 +145,14 @@ cargo build  # Fast compilation, debug symbols
 
 ## What's Next?
 
-Explore the four core capabilities:
+Explore the complete AI development workflow:
 
-1. **Quantization** → Compress models to fit in 16GB
-2. **QLoRA** → Fine-tune on your personal data
-3. **RWKV/Mamba** → Run efficient architectures on CPU
-4. **NeSy** → Build verified reasoning systems
+1. **Load Models** → Download from HuggingFace with `sutra-loader`
+2. **Tokenize** → Prepare data with BPE/WordPiece/Unigram
+3. **Train** → Use modern optimizers (Adam, SGD) and schedulers
+4. **Fine-tune** → QLoRA for parameter-efficient adaptation
+5. **Quantize** → Compress to 4-bit for efficient deployment
+6. **Deploy** → Run RWKV/Mamba architectures on CPU
+7. **Verify** → Add NeSy tools for guaranteed correctness
 
 Start with the examples and experiment!

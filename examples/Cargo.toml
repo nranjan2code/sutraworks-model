@@ -11,6 +11,7 @@ sutra-peft = { workspace = true }
 sutra-rwkv = { workspace = true }
 sutra-mamba = { workspace = true }
 sutra-nesy = { workspace = true }
+sutra-loader = { workspace = true }
 ndarray = { workspace = true }
 
 [[example]]
@@ -32,3 +33,7 @@ path = "mamba_inference.rs"
 [[example]]
 name = "nesy_agent"
 path = "nesy_agent.rs"
+
+[[example]]
+name = "model_loader"
+path = "model_loader.rs"

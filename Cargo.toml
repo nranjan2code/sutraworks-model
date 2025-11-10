@@ -7,6 +7,9 @@ members = [
     "crates/sutra-mamba",
     "crates/sutra-nesy",
     "crates/sutra-core",
+    "crates/sutra-loader",
+    "crates/sutra-tokenizer",
+    "crates/sutra-training",
     "examples",
 ]
 
@@ -45,6 +48,9 @@ sutra-peft = { path = "crates/sutra-peft" }
 sutra-rwkv = { path = "crates/sutra-rwkv" }
 sutra-mamba = { path = "crates/sutra-mamba" }
 sutra-nesy = { path = "crates/sutra-nesy" }
+sutra-loader = { path = "crates/sutra-loader" }
+sutra-tokenizer = { path = "crates/sutra-tokenizer" }
+sutra-training = { path = "crates/sutra-training" }
 
 [profile.release]
 opt-level = 3
