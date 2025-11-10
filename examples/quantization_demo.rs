@@ -4,7 +4,7 @@
 
 use sutra_core::{Tensor, DType};
 use sutra_quantize::{AwqQuantizer, AwqConfig, Dequantizer};
-use ndarray::{Array, ArrayD, IxDyn};
+use ndarray::{Array, IxDyn};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== AWQ Quantization Demo ===\n");

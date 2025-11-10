@@ -75,13 +75,14 @@ impl RwkvModel {
         let mut state = state.unwrap_or_else(|| RwkvState::new(&self.config));
         
         // In a real implementation, this would:
-        // 1. Embed tokens
-        // 2. Process through RWKV layers
-        // 3. Generate logits
-        // 4. Update state
+        // 1. Embed tokens using embedding layer
+        // 2. Process through RWKV layers sequentially
+        // 3. Apply final layer norm
+        // 4. Project to vocabulary with output layer
+        // 5. Return logits
         
-        // Placeholder implementation
-        let logits = vec![0.0; self.config.vocab_size];
+        // For now, create simplified logits (uniform distribution)
+        let logits = vec![1.0 / self.config.vocab_size as f32; self.config.vocab_size];
         
         Ok((logits, state))
     }

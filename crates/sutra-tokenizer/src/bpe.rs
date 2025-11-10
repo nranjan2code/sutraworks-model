@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::error::{TokenizerError, Result};
+use crate::error::Result;
 use crate::vocab::Vocab;
 
 /// BPE (Byte Pair Encoding) tokenizer configuration

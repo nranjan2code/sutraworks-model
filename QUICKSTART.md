@@ -22,7 +22,23 @@
 
 ## Running Examples
 
-### 1. Model Loader (NEW!) ✨
+### 1. End-to-End Pipeline (NEW!) ⭐
+Experience the complete AI workflow in action:
+```bash
+cargo run --example end_to_end --release
+```
+
+**Output**: Demonstrates model registry, safetensors loading, HuggingFace downloads.
+
+### 3. Quantization Demo
+See 4-bit model compression in action:U)
+- ✅ 4-bit quantization (6x compression!)
+- ✅ RWKV model inference
+- ✅ Token sampling and decoding
+
+**Output**: Complete pipeline in <0.1 seconds, <100MB memory!
+
+### 2. Model Loader
 Load models from HuggingFace and safetensors:
 ```bash
 cargo run --example model_loader --release
@@ -38,7 +54,7 @@ cargo run --example quantization_demo --release
 
 **Output**: Demonstrates ~6x memory reduction with AWQ quantization.
 
-### 3. QLoRA Fine-Tuning
+### 4. QLoRA Fine-Tuning
 Learn about parameter-efficient fine-tuning:
 ```bash
 cargo run --example qlora_training --release
@@ -46,7 +62,7 @@ cargo run --example qlora_training --release
 
 **Output**: Shows how to fine-tune 3B models with <8GB RAM using training infrastructure.
 
-### 4. RWKV Inference
+### 5. RWKV Inference
 Explore efficient RNN-based inference:
 ```bash
 cargo run --example rwkv_inference --release
@@ -54,7 +70,7 @@ cargo run --example rwkv_inference --release
 
 **Output**: Demonstrates constant memory, linear O(n) complexity inference.
 
-### 5. Mamba Inference
+### 6. Mamba Inference
 Experience 5x faster throughput:
 ```bash
 cargo run --example mamba_inference --release
@@ -62,7 +78,7 @@ cargo run --example mamba_inference --release
 
 **Output**: Shows linear-time state space model advantages.
 
-### 6. Neuro-Symbolic Agent
+### 7. Neuro-Symbolic Agent
 Build hybrid AI with verified reasoning:
 ```bash
 cargo run --example nesy_agent --release

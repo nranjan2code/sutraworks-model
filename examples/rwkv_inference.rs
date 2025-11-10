@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("✓ Perfect for edge devices");
     
     // Initialize state
-    let mut state = RwkvState::new(model.config());
+    let state = RwkvState::new(model.config());
     
     println!("\n=== State Management ===");
     println!("State memory: {:.2} KB", state.memory_usage() as f64 / 1024.0);

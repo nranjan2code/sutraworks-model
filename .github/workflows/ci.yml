@@ -128,6 +128,10 @@ jobs:
       - name: Test nesy_agent example
         run: cargo run --example nesy_agent --release
         timeout-minutes: 5
+      
+      - name: Test end_to_end pipeline example ⭐
+        run: cargo run --example end_to_end --release
+        timeout-minutes: 5
 
   docs:
     name: Documentation

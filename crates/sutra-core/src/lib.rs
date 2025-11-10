@@ -2,6 +2,7 @@
 pub mod tensor;
 pub mod model;
 pub mod error;
+pub mod ops;
 
 pub use tensor::{Tensor, TensorView, DType};
 pub use model::{ModelConfig, ModelWeights};
@@ -11,4 +12,5 @@ pub use error::{SutraError, Result};
 pub mod prelude {
     pub use crate::{Tensor, TensorView, DType, ModelConfig, ModelWeights};
     pub use crate::{SutraError, Result};
+    pub use crate::ops;
 }

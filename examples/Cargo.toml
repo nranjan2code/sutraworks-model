@@ -12,7 +12,9 @@ sutra-rwkv = { workspace = true }
 sutra-mamba = { workspace = true }
 sutra-nesy = { workspace = true }
 sutra-loader = { workspace = true }
+sutra-tokenizer = { workspace = true }
 ndarray = { workspace = true }
+rand = { workspace = true }
 
 [[example]]
 name = "quantization_demo"
@@ -37,3 +39,7 @@ path = "nesy_agent.rs"
 [[example]]
 name = "model_loader"
 path = "model_loader.rs"
+
+[[example]]
+name = "end_to_end"
+path = "end_to_end.rs"

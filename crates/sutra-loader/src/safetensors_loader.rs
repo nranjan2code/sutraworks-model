@@ -108,6 +108,11 @@ impl SafetensorsLoader {
                 let values: Vec<f32> = Self::bytes_to_vec_f16(data);
                 Tensor::from_slice(&values, shape, DType::F16)?
             }
+            DType::I32 => {
+                // Convert i32 bytes to f32 for computation
+                let values: Vec<f32> = Self::bytes_to_vec_i32(data);
+                Tensor::from_slice(&values, shape, DType::I32)?
+            }
             DType::I8 | DType::U8 => {
                 let float_values: Vec<f32> = data.iter().map(|&x| x as f32).collect();
                 Tensor::from_slice(&float_values, shape, DType::U8)?
@@ -147,9 +152,9 @@ impl SafetensorsLoader {
         match dtype {
             safetensors::Dtype::F32 => Ok(DType::F32),
             safetensors::Dtype::F16 => Ok(DType::F16),
+            safetensors::Dtype::I32 => Ok(DType::I32),
             safetensors::Dtype::I8 => Ok(DType::I8),
             safetensors::Dtype::U8 => Ok(DType::U8),
-            safetensors::Dtype::I32 => Ok(DType::I8), // Convert I32 to I8 for simplicity
             _ => Err(LoaderError::UnsupportedFormat(format!("Unsupported dtype: {:?}", dtype))),
         }
     }
@@ -204,6 +209,24 @@ impl SafetensorsLoader {
             };
             
             result.push(f32::from_bits(f32_bits));
+        }
+        
+        result
+    }
+    
+    /// Convert i32 bytes to f32 vec for computation
+    fn bytes_to_vec_i32(bytes: &[u8]) -> Vec<f32> {
+        let count = bytes.len() / 4;
+        let mut result = Vec::with_capacity(count);
+        
+        for i in 0..count {
+            let i32_val = i32::from_le_bytes([
+                bytes[i * 4],
+                bytes[i * 4 + 1],
+                bytes[i * 4 + 2],
+                bytes[i * 4 + 3],
+            ]);
+            result.push(i32_val as f32);
         }
         
         result

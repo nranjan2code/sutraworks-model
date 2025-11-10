@@ -21,7 +21,8 @@ impl PreTokenizer for WhitespacePreTokenizer {
 pub struct ByteLevelPreTokenizer;
 
 static BYTE_LEVEL_PATTERN: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+").unwrap()
+    // Simplified regex without lookahead which isn't supported in the regex crate
+    Regex::new(r"'s|'t|'re|'ve|'m|'ll|'d| ?\pL+| ?\pN+| ?[^\s\pL\pN]+|\s+").unwrap()
 });
 
 impl PreTokenizer for ByteLevelPreTokenizer {

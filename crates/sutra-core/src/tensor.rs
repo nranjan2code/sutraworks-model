@@ -7,6 +7,7 @@ use crate::error::{Result, SutraError};
 pub enum DType {
     F32,
     F16,
+    I32,
     I8,
     U8,
     I4,  // 4-bit integer for quantization
@@ -15,7 +16,7 @@ pub enum DType {
 impl DType {
     pub fn size_bytes(&self) -> usize {
         match self {
-            DType::F32 => 4,
+            DType::F32 | DType::I32 => 4,
             DType::F16 => 2,
             DType::I8 | DType::U8 => 1,
             DType::I4 => 1, // Packed, but accounting at byte level
