@@ -17,6 +17,9 @@ pub enum SutraError {
     #[error("Unsupported data type: {0}")]
     UnsupportedDType(String),
 
+    #[error("Compute error: {0}")]
+    ComputeError(String),
+
     #[error("I/O error: {0}")]
     IoError(#[from] std::io::Error),
 

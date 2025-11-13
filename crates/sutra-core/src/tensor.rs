@@ -25,6 +25,7 @@ impl DType {
 }
 
 /// Multi-dimensional tensor with dynamic shape
+#[derive(Clone)]
 pub struct Tensor {
     data: ArrayD<f32>,
     dtype: DType,
@@ -43,6 +44,23 @@ impl Tensor {
     pub fn zeros(shape: &[usize], dtype: DType) -> Self {
         let data = ArrayD::zeros(IxDyn(shape));
         Self::new(data, dtype)
+    }
+
+    pub fn randn(shape: &[usize], dtype: DType) -> Result<Self> {
+        use rand_distr::{Normal, Distribution};
+        
+        let total_size: usize = shape.iter().product();
+        let mut rng = rand::thread_rng();
+        let normal = Normal::new(0.0, 1.0).map_err(|e| SutraError::ComputeError(e.to_string()))?;
+        
+        let data: Vec<f32> = (0..total_size)
+            .map(|_| normal.sample(&mut rng))
+            .collect();
+            
+        let arr = Array::from_shape_vec(IxDyn(shape), data)
+            .map_err(|e| SutraError::InvalidShape(e.to_string()))?;
+            
+        Ok(Self::new(arr, dtype))
     }
 
     pub fn from_slice(data: &[f32], shape: &[usize], dtype: DType) -> Result<Self> {
@@ -89,6 +107,57 @@ impl Tensor {
     /// Memory usage in bytes
     pub fn memory_usage(&self) -> usize {
         self.data.len() * self.dtype.size_bytes()
+    }
+
+    /// Reshape tensor to new dimensions
+    pub fn reshape(&self, new_shape: &[usize]) -> Result<Self> {
+        let total_size: usize = self.data.len();
+        let new_total: usize = new_shape.iter().product();
+        
+        if total_size != new_total {
+            return Err(SutraError::InvalidShape(format!(
+                "Cannot reshape tensor of size {} to shape {:?} (size {})",
+                total_size, new_shape, new_total
+            )));
+        }
+        
+        let reshaped = self.data.clone().into_shape_with_order(IxDyn(new_shape))
+            .map_err(|e| SutraError::InvalidShape(e.to_string()))?;
+            
+        Ok(Tensor::new(reshaped, self.dtype))
+    }
+    
+    /// Scale tensor by constant factor
+    pub fn scale(&self, factor: f32) -> Result<Self> {
+        let scaled_data = &self.data * factor;
+        Ok(Tensor::new(scaled_data, self.dtype))
+    }
+    
+    /// Remove dimension of size 1 at specified axis
+    pub fn squeeze(&self, axis: usize) -> Result<Self> {
+        let shape = self.shape();
+        if axis >= shape.len() {
+            return Err(SutraError::InvalidShape(format!(
+                "Axis {} out of range for tensor with {} dimensions", 
+                axis, shape.len()
+            )));
+        }
+        
+        if shape[axis] != 1 {
+            return Err(SutraError::InvalidShape(format!(
+                "Cannot squeeze axis {} with size {}", 
+                axis, shape[axis]
+            )));
+        }
+        
+        let mut new_shape = Vec::new();
+        for (i, &dim) in shape.iter().enumerate() {
+            if i != axis {
+                new_shape.push(dim);
+            }
+        }
+        
+        self.reshape(&new_shape)
     }
 }
 

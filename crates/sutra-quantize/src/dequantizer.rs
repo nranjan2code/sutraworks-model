@@ -34,15 +34,15 @@ impl Dequantizer {
         Ok(Tensor::new(arr, DType::F32))
     }
 
-    /// Dequantize AWQ quantized weights
+    /// Dequantize AWQ quantized weights with proper bit-unpacking
     pub fn dequantize_awq(&self, qweights: &QuantizedWeights) -> Result<Tensor> {
         let (out_features, in_features) = (qweights.shape[0], qweights.shape[1]);
         let group_size = qweights.group_size;
         let n_groups = (in_features + group_size - 1) / group_size;
 
         let mut output = Vec::with_capacity(out_features * in_features);
+        let mut value_idx = 0;
 
-        let mut idx = 0;
         for row_idx in 0..out_features {
             for g in 0..n_groups {
                 let start = g * group_size;
@@ -57,11 +57,21 @@ impl Dequantizer {
                     .map(|z| z[scale_idx] as f32)
                     .unwrap_or(0.0);
 
+                // Dequantize group with bit-unpacking
                 for _ in 0..group_len {
-                    let qval = qweights.qweights[idx] as f32;
-                    let dequant = (qval - zero) * scale;
+                    // Unpack 4-bit value from packed representation
+                    let byte_idx = value_idx / 2;
+                    let is_high_nibble = value_idx % 2 == 1;
+                    
+                    let qval = if is_high_nibble {
+                        (qweights.qweights[byte_idx] >> 4) & 0x0F
+                    } else {
+                        qweights.qweights[byte_idx] & 0x0F
+                    };
+                    
+                    let dequant = (qval as f32 - zero) * scale;
                     output.push(dequant);
-                    idx += 1;
+                    value_idx += 1;
                 }
             }
         }

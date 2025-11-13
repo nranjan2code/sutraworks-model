@@ -59,6 +59,7 @@ impl Default for TrainingState {
 }
 
 pub struct Trainer {
+    #[allow(dead_code)]
     config: TrainerConfig,
     state: TrainingState,
 }

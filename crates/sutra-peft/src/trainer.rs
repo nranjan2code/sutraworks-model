@@ -27,6 +27,7 @@ impl Default for TrainingConfig {
 
 /// PEFT trainer for fine-tuning with LoRA/QLoRA
 pub struct PeftTrainer {
+    #[allow(dead_code)]
     config: TrainingConfig,
 }
 

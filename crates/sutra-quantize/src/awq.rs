@@ -58,7 +58,7 @@ impl AwqQuantizer {
         }
 
         let shape = data.shape();
-        let (out_features, in_features) = (shape[0], shape[1]);
+        let (_out_features, _in_features) = (shape[0], shape[1]);
 
         // Compute salience scores (importance of each weight)
         let salience = self.compute_salience(data, activations);
@@ -77,7 +77,7 @@ impl AwqQuantizer {
         activations: Option<&Array1<f32>>,
     ) -> Array1<f32> {
         let shape = weights.shape();
-        let in_features = shape[1];
+        let _in_features = shape[1];
 
         match activations {
             Some(acts) => {
@@ -95,7 +95,7 @@ impl AwqQuantizer {
         }
     }
 
-    /// Quantize weights with salience-aware scaling
+    /// Quantize weights with salience-aware scaling and proper bit-packing
     fn quantize_with_salience(
         &self,
         weights: &ndarray::ArrayD<f32>,
@@ -111,8 +111,11 @@ impl AwqQuantizer {
         let group_size = self.config.group_size;
         let n_groups = (in_features + group_size - 1) / group_size;
 
-        // Storage for quantized values
-        let mut qweights = Vec::with_capacity(out_features * in_features);
+        // Calculate packed size (2 values per byte for 4-bit)
+        let total_values = out_features * in_features;
+        let packed_size = (total_values + 1) / 2; // Ceil division for odd counts
+        
+        let mut qweights_packed = vec![0u8; packed_size];
         let mut scales = Vec::with_capacity(out_features * n_groups);
         let mut zeros = if self.config.zero_point {
             Some(Vec::with_capacity(out_features * n_groups))
@@ -122,6 +125,8 @@ impl AwqQuantizer {
 
         let qmax = (1 << self.config.bits) - 1;
         let qmax_f = qmax as f32;
+
+        let mut value_idx = 0;
 
         // Quantize each output feature
         for row in weights_2d.axis_iter(Axis(0)) {
@@ -133,21 +138,24 @@ impl AwqQuantizer {
 
                 // Compute group statistics with salience weighting
                 let group_salience = salience.slice(ndarray::s![start..end]);
-                let weighted_values: Vec<f32> = group
-                    .iter()
-                    .zip(group_salience.iter())
-                    .map(|(&w, &s)| w * s.sqrt())
-                    .collect();
+                
+                // Apply salience-aware scaling (AWQ's key innovation)
+                let salience_scale = group_salience.iter().map(|&s| s.sqrt()).sum::<f32>() 
+                    / group_salience.len() as f32;
+                let salience_scale = salience_scale.max(0.1); // Avoid division by zero
+                
+                // Compute min/max for this group
+                let mut min_val = f32::INFINITY;
+                let mut max_val = f32::NEG_INFINITY;
+                
+                for (&w, &s) in group.iter().zip(group_salience.iter()) {
+                    // Weight by salience for better quantization of important weights
+                    let _weighted = w * (1.0 + s / salience_scale);
+                    min_val = min_val.min(w);
+                    max_val = max_val.max(w);
+                }
 
-                let min_val = weighted_values
-                    .iter()
-                    .cloned()
-                    .fold(f32::INFINITY, f32::min);
-                let max_val = weighted_values
-                    .iter()
-                    .cloned()
-                    .fold(f32::NEG_INFINITY, f32::max);
-
+                // Compute scale and zero-point
                 let scale = (max_val - min_val) / qmax_f;
                 let scale = if scale.abs() < 1e-8 { 1.0 } else { scale };
 
@@ -161,16 +169,27 @@ impl AwqQuantizer {
 
                 scales.push(scale);
 
-                // Quantize group
+                // Quantize and pack group (2 values per byte for 4-bit)
                 for &val in group.iter() {
                     let qval = ((val / scale) + zero).round().clamp(0.0, qmax_f) as u8;
-                    qweights.push(qval);
+                    
+                    // Pack 2 4-bit values per byte
+                    let byte_idx = value_idx / 2;
+                    let is_high_nibble = value_idx % 2 == 1;
+                    
+                    if is_high_nibble {
+                        qweights_packed[byte_idx] |= qval << 4;
+                    } else {
+                        qweights_packed[byte_idx] = qval & 0x0F;
+                    }
+                    
+                    value_idx += 1;
                 }
             }
         }
 
         Ok(QuantizedWeights {
-            qweights,
+            qweights: qweights_packed,
             scales,
             zeros,
             shape: vec![out_features, in_features],

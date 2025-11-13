@@ -74,7 +74,6 @@ impl ModelWeights {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tensor::DType;
 
     #[test]
     fn test_model_config() {

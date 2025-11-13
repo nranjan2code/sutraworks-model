@@ -31,6 +31,7 @@ impl Default for QLoraConfig {
 /// 2. Training only small LoRA adapters in full precision
 /// 3. Using paged optimizers to manage memory spikes
 pub struct QLoraLayer {
+    #[allow(dead_code)]
     config: QLoraConfig,
     /// LoRA adapters (trained)
     lora_layer: LoraLayer,

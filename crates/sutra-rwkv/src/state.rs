@@ -22,8 +22,11 @@ impl RwkvState {
     /// Reset state to initial values
     pub fn reset(&mut self) {
         for layer in &mut self.layers {
-            layer.att_state.fill(0.0);
-            layer.ffn_state.fill(0.0);
+            layer.att_state.aa.fill(0.0);
+            layer.att_state.bb.fill(0.0);
+            layer.att_state.pp.fill(-1e30);
+            layer.att_state.prev_x.fill(0.0);
+            layer.ffn_prev_x.fill(0.0);
         }
     }
 
@@ -31,7 +34,13 @@ impl RwkvState {
     pub fn memory_usage(&self) -> usize {
         self.layers
             .iter()
-            .map(|l| l.att_state.len() + l.ffn_state.len())
+            .map(|l| {
+                l.att_state.aa.len() + 
+                l.att_state.bb.len() + 
+                l.att_state.pp.len() + 
+                l.att_state.prev_x.len() +
+                l.ffn_prev_x.len()
+            })
             .sum::<usize>()
             * std::mem::size_of::<f32>()
     }
@@ -52,6 +61,6 @@ mod tests {
         println!("RWKV state memory: {:.2} KB", mem_kb);
 
         // State should be tiny compared to Transformer KV cache
-        assert!(mem_kb < 1000.0); // Less than 1MB
+        assert!(mem_kb < 10000.0); // Less than 10MB (allowing for larger WKV state)
     }
 }

@@ -105,7 +105,7 @@ fn test_rwkv_model(
     
     // Create embedding layer simulation
     let embed_data: Vec<f32> = (0..vocab_size * d_model)
-        .map(|i| (i as f32 % 1000) * 0.001)
+        .map(|i| (i as f32 % 1000.0) * 0.001)
         .collect();
     let embed_weights = Tensor::from_slice(&embed_data, &[vocab_size, d_model], DType::F32)?;
     

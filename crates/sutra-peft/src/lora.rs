@@ -1,5 +1,4 @@
-use ndarray::{s, Array2, ArrayView2};
-use rand::Rng;
+use ndarray::{Array2, ArrayView2};
 use rand_distr::{Distribution, Normal};
 use serde::{Deserialize, Serialize};
 use sutra_core::{Result, SutraError};

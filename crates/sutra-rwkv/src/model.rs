@@ -2,6 +2,7 @@ use crate::layer::RwkvLayer;
 use crate::state::RwkvState;
 use serde::{Deserialize, Serialize};
 use sutra_core::Result;
+use ndarray::Array1;
 
 /// RWKV model configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +44,13 @@ impl RwkvConfig {
 pub struct RwkvModel {
     config: RwkvConfig,
     layers: Vec<RwkvLayer>,
+    // Embedding layer
+    token_embedding: ndarray::Array2<f32>,
+    // Final layer norm
+    final_ln_weight: ndarray::Array1<f32>,
+    final_ln_bias: ndarray::Array1<f32>,
+    // Output projection (often tied with input embedding)
+    output_weight: ndarray::Array2<f32>,
 }
 
 impl RwkvModel {
@@ -53,7 +61,30 @@ impl RwkvModel {
             layers.push(RwkvLayer::new(config.hidden_size, layer_idx)?);
         }
 
-        Ok(Self { config, layers })
+        // Initialize with Xavier/Glorot uniform
+        let scale = (6.0 / (config.vocab_size as f32 + config.hidden_size as f32)).sqrt();
+        
+        // Token embedding matrix
+        let token_embedding = ndarray::Array2::from_shape_fn(
+            (config.vocab_size, config.hidden_size),
+            |_| (rand::random::<f32>() * 2.0 - 1.0) * scale
+        );
+
+        // Final layer norm
+        let final_ln_weight = ndarray::Array1::ones(config.hidden_size);
+        let final_ln_bias = ndarray::Array1::zeros(config.hidden_size);
+
+        // Output projection (tied weights with input embedding)
+        let output_weight = token_embedding.t().to_owned();
+
+        Ok(Self { 
+            config, 
+            layers,
+            token_embedding,
+            final_ln_weight,
+            final_ln_bias,
+            output_weight,
+        })
     }
 
     /// Forward pass through the model
@@ -67,20 +98,31 @@ impl RwkvModel {
     /// * Updated state for next step
     pub fn forward(
         &self,
-        _input: &[usize],
+        input: &[usize],
         state: Option<RwkvState>,
     ) -> Result<(Vec<f32>, RwkvState)> {
-        let state = state.unwrap_or_else(|| RwkvState::new(&self.config));
+        if input.is_empty() {
+            return Ok((vec![0.0; self.config.vocab_size], state.unwrap_or_else(|| RwkvState::new(&self.config))));
+        }
 
-        // In a real implementation, this would:
-        // 1. Embed tokens using embedding layer
+        let mut state = state.unwrap_or_else(|| RwkvState::new(&self.config));
+
+        // Process only the last token for autoregressive generation
+        let token_id = input[input.len() - 1];
+        
+        // 1. Embed the token
+        let mut x = self.embed_token(token_id);
+
         // 2. Process through RWKV layers sequentially
-        // 3. Apply final layer norm
-        // 4. Project to vocabulary with output layer
-        // 5. Return logits
+        for (i, layer) in self.layers.iter().enumerate() {
+            x = layer.forward(&x, &mut state.layers[i])?;
+        }
 
-        // For now, create simplified logits (uniform distribution)
-        let logits = vec![1.0 / self.config.vocab_size as f32; self.config.vocab_size];
+        // 3. Apply final layer norm
+        x = self.final_layer_norm(&x);
+
+        // 4. Project to vocabulary (using input embedding weights transposed as is common)
+        let logits = self.output_projection(&x);
 
         Ok((logits, state))
     }
@@ -126,13 +168,80 @@ impl RwkvModel {
     pub fn config(&self) -> &RwkvConfig {
         &self.config
     }
+
+    /// Embed a single token
+    fn embed_token(&self, token_id: usize) -> Array1<f32> {
+        if token_id >= self.config.vocab_size {
+            // Return zero vector for out-of-vocab tokens
+            return Array1::zeros(self.config.hidden_size);
+        }
+        self.token_embedding.row(token_id).to_owned()
+    }
+
+    /// Apply final layer normalization
+    fn final_layer_norm(&self, x: &Array1<f32>) -> Array1<f32> {
+        let mean = x.mean().unwrap_or(0.0);
+        let var = x.iter().map(|&v| (v - mean).powi(2)).sum::<f32>() / x.len() as f32;
+        let std = (var + 1e-5).sqrt();
+        
+        x.iter()
+            .zip(self.final_ln_weight.iter())
+            .zip(self.final_ln_bias.iter())
+            .map(|((&val, &w), &b)| ((val - mean) / std) * w + b)
+            .collect()
+    }
+
+    /// Project hidden state to vocabulary logits
+    fn output_projection(&self, x: &Array1<f32>) -> Vec<f32> {
+        // Matrix multiply with output weights (vocab_size x hidden_size) * (hidden_size,) = (vocab_size,)
+        self.output_weight.dot(x).to_vec()
+    }
+
+    /// Load model weights from checkpoint
+    pub fn load_weights(
+        &mut self,
+        token_embedding: ndarray::Array2<f32>,
+        final_ln_weight: ndarray::Array1<f32>,
+        final_ln_bias: ndarray::Array1<f32>,
+    ) {
+        self.token_embedding = token_embedding;
+        self.final_ln_weight = final_ln_weight;
+        self.final_ln_bias = final_ln_bias;
+        // Update output weights (tied)
+        self.output_weight = self.token_embedding.t().to_owned();
+    }
+
+    /// Get mutable access to layers for loading weights
+    pub fn layers_mut(&mut self) -> &mut [RwkvLayer] {
+        &mut self.layers
+    }
+}
+
+// Simple PRNG for initialization
+mod rand {
+    use std::cell::Cell;
+    thread_local! {
+        static SEED: Cell<u64> = Cell::new(0x1234567890abcdef);
+    }
+    
+    pub fn random<T>() -> T 
+    where
+        T: From<f32>
+    {
+        SEED.with(|seed| {
+            let mut s = seed.get();
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            seed.set(s);
+            T::from(((s as f64) / (u64::MAX as f64)) as f32)
+        })
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    #[test]
+    use super::*;    #[test]
     fn test_rwkv_model_creation() {
         let config = RwkvConfig::new(12, 768, 50000);
         let model = RwkvModel::new(config).unwrap();

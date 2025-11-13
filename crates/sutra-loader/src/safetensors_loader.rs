@@ -34,6 +34,7 @@ pub struct TensorInfo {
 /// # Ok::<(), sutra_loader::LoaderError>(())
 /// ```
 pub struct SafetensorsLoader {
+    #[allow(dead_code)]
     path: String,
     mmap: Option<Mmap>,
     metadata: HashMap<String, TensorInfo>,

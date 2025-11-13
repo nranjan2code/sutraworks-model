@@ -29,6 +29,9 @@ pub enum LoaderError {
     #[error("Model not found in registry: {0}")]
     ModelNotFound(String),
 
+    #[error("Invalid model configuration: {0}")]
+    InvalidConfig(String),
+
     #[error("Unsupported format: {0}")]
     UnsupportedFormat(String),
 

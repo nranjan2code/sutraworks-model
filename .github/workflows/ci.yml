@@ -132,6 +132,10 @@ jobs:
       - name: Test end_to_end pipeline example ⭐
         run: cargo run --example end_to_end --release
         timeout-minutes: 5
+      
+      - name: Test production_validation example ⭐ PRODUCTION
+        run: cargo run --example production_validation --release
+        timeout-minutes: 10
 
   docs:
     name: Documentation
