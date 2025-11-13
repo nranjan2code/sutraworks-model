@@ -42,23 +42,24 @@ pub fn quantized_matmul(a: &Tensor, b_quantized: &QuantizedWeights) -> Result<Te
     // Dequantize B column-wise and compute
     // This is more memory-efficient than dequantizing the entire matrix
     let group_size = b_quantized.group_size;
-    let n_groups = (k + group_size - 1) / group_size;
+    let n_groups = (n + group_size - 1) / group_size;
     
     for col_idx in 0..n {
         // Dequantize one column of B
         let mut b_col = Vec::with_capacity(k);
         
         for row_idx in 0..k {
-            let group_idx = row_idx / group_size;
-            let scale_idx = col_idx * n_groups + group_idx;
+            // Groups are along the column dimension (in_features)
+            let group_idx = col_idx / group_size;
+            let scale_idx = row_idx * n_groups + group_idx;
             let scale = b_quantized.scales[scale_idx.min(b_quantized.scales.len() - 1)];
             let zero = b_quantized.zeros
                 .as_ref()
-                .map(|z| z[scale_idx.min(z.len() - 1)] as f32)
+                .map(|z| z[scale_idx.min(z.len() - 1)] as i8 as f32) // Interpret u8 as i8
                 .unwrap_or(0.0);
             
-            // Unpack quantized value
-            let value_idx = col_idx * k + row_idx;
+            // Unpack quantized value (row-major packing: row0[all_cols], row1[all_cols], ...)
+            let value_idx = row_idx * n + col_idx;
             let byte_idx = value_idx / 2;
             let is_high_nibble = value_idx % 2 == 1;
             
@@ -200,5 +201,65 @@ mod tests {
         
         assert_eq!(salience.len(), 16);
         assert!(salience.iter().all(|&x| x >= 0.0));
+    }
+    
+    #[test]
+    fn test_quantized_matmul_accuracy() {
+        use sutra_core::ops;
+        
+        // Create test matrices with known values
+        let a_data: Vec<f32> = vec![
+            1.0, 2.0, 3.0, 4.0,
+            5.0, 6.0, 7.0, 8.0,
+        ];
+        let a_arr = Array::from_shape_vec(IxDyn(&[2, 4]), a_data).unwrap();
+        let a = Tensor::new(a_arr, DType::F32);
+        
+        let b_data: Vec<f32> = vec![
+            0.5, 1.5,
+            2.0, 2.5,
+            1.0, 0.5,
+            3.0, 1.0,
+        ];
+        let b_arr = Array::from_shape_vec(IxDyn(&[4, 2]), b_data).unwrap();
+        let b = Tensor::new(b_arr.clone(), DType::F32);
+        
+        // Compute f32 baseline
+        let baseline = ops::matmul(&a, &b).unwrap();
+        
+        // Quantize B without salience weighting for testing
+        let quantizer = AwqQuantizer::new(AwqConfig {
+            bits: 4,
+            group_size: 4, // Small group size for this test
+            n_samples: 512,
+            zero_point: true,
+        });
+        let b_quantized = quantizer.quantize(&b, None).unwrap();
+        
+        // Perform quantized matmul
+        let result = quantized_matmul(&a, &b_quantized).unwrap();
+        
+        // Check shapes match
+        assert_eq!(result.shape(), baseline.shape());
+        
+        // Check values are reasonably close (accounting for quantization error)
+        let baseline_data = baseline.data().as_slice().unwrap();
+        let result_data = result.data().as_slice().unwrap();
+        
+        for (i, (&expected, &actual)) in baseline_data.iter().zip(result_data.iter()).enumerate() {
+            let error = (expected - actual).abs();
+            let relative_error = if expected.abs() > 1e-5 {
+                error / expected.abs()
+            } else {
+                error
+            };
+            
+            // Allow up to 15% relative error due to 4-bit quantization
+            assert!(
+                relative_error < 0.15 || error < 1.5,
+                "Value {} mismatch at index {}: expected {}, got {} (error: {}, relative: {})",
+                i, i, expected, actual, error, relative_error
+            );
+        }
     }
 }

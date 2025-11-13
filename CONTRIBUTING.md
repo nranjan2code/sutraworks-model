@@ -32,7 +32,7 @@ Thank you for your interest in contributing to SutraWorks Model! This document p
 5. Run tests to ensure everything works:
    ```bash
    cargo test --all
-   # Should see: 51 tests passing
+   # Should see: 57 tests passing
    ```
 
 ## 🏗️ Project Structure

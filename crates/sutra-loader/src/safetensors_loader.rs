@@ -169,16 +169,25 @@ impl SafetensorsLoader {
         }
     }
 
-    /// Convert bytes to Vec<T> with proper alignment
-    fn bytes_to_vec<T: Clone>(bytes: &[u8]) -> Vec<T> {
-        let count = bytes.len() / std::mem::size_of::<T>();
+    /// Convert bytes to Vec<f32> with alignment-safe conversion
+    fn bytes_to_vec<T: Clone>(bytes: &[u8]) -> Vec<T> 
+    where
+        T: From<f32>,
+    {
+        // For f32 specifically, use from_le_bytes to avoid alignment UB
+        let count = bytes.len() / 4;
         let mut vec = Vec::with_capacity(count);
-
-        unsafe {
-            std::ptr::copy_nonoverlapping(bytes.as_ptr() as *const T, vec.as_mut_ptr(), count);
-            vec.set_len(count);
+        
+        for i in 0..count {
+            let f32_val = f32::from_le_bytes([
+                bytes[i * 4],
+                bytes[i * 4 + 1],
+                bytes[i * 4 + 2],
+                bytes[i * 4 + 3],
+            ]);
+            vec.push(T::from(f32_val));
         }
-
+        
         vec
     }
 

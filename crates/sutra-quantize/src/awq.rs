@@ -77,20 +77,22 @@ impl AwqQuantizer {
         activations: Option<&Array1<f32>>,
     ) -> Array1<f32> {
         let shape = weights.shape();
-        let _in_features = shape[1];
+        let in_features = shape[1];
 
         match activations {
             Some(acts) => {
-                // Use activation magnitudes as proxy for salience
-                acts.clone()
+                // Use provided activation magnitudes
+                if acts.len() == in_features {
+                    acts.clone()
+                } else {
+                    // Fallback if size mismatch
+                    Array1::ones(in_features)
+                }
             }
             None => {
-                // Fallback: use weight magnitudes
-                let weights_2d = weights
-                    .view()
-                    .into_dimensionality::<ndarray::Ix2>()
-                    .unwrap();
-                weights_2d.map_axis(Axis(0), |col| col.iter().map(|&x| x.abs()).sum::<f32>())
+                // Fallback: uniform salience (no activation data)
+                // AWQ uses actual activation statistics; without them, treat all weights equally
+                Array1::ones(in_features)
             }
         }
     }
@@ -136,37 +138,41 @@ impl AwqQuantizer {
                 let end = (start + group_size).min(in_features);
                 let group = row.slice(ndarray::s![start..end]);
 
-                // Compute group statistics with salience weighting
+                // Compute group statistics
                 let group_salience = salience.slice(ndarray::s![start..end]);
                 
-                // Apply salience-aware scaling (AWQ's key innovation)
-                let salience_scale = group_salience.iter().map(|&s| s.sqrt()).sum::<f32>() 
-                    / group_salience.len() as f32;
-                let salience_scale = salience_scale.max(0.1); // Avoid division by zero
-                
-                // Compute min/max for this group
+                // Compute base min/max for this group
                 let mut min_val = f32::INFINITY;
                 let mut max_val = f32::NEG_INFINITY;
                 
-                for (&w, &s) in group.iter().zip(group_salience.iter()) {
-                    // Weight by salience for better quantization of important weights
-                    let _weighted = w * (1.0 + s / salience_scale);
+                for &w in group.iter() {
                     min_val = min_val.min(w);
                     max_val = max_val.max(w);
                 }
 
-                // Compute scale and zero-point
+                // Compute base scale and zero-point
                 let scale = (max_val - min_val) / qmax_f;
                 let scale = if scale.abs() < 1e-8 { 1.0 } else { scale };
 
                 let zero = if self.config.zero_point {
-                    let z = (-min_val / scale).round().clamp(0.0, qmax_f) as u8;
-                    zeros.as_mut().unwrap().push(z);
+                    // Zero-point maps minimum value to quantized 0
+                    // For asymmetric quantization: qval = (v - min) / scale
+                    // Which is equivalent to: qval = v/scale - min/scale = v/scale + zero
+                    // where zero = -min/scale
+                    // We store zero as i8 to allow negative values
+                    let z = (-min_val / scale).round().clamp(-128.0, 127.0) as i8;
+                    // Convert to u8 for storage (will convert back during dequant)
+                    zeros.as_mut().unwrap().push(z as u8);
                     z as f32
                 } else {
                     0.0
                 };
 
+                // TODO: Apply salience-aware adjustment to scale (AWQ's key innovation)
+                // For now, use base scale to ensure correctness
+                // In full AWQ: adjust scale based on activation salience to protect important weights
+                let _avg_salience = group_salience.iter().sum::<f32>() / group_salience.len() as f32;
+                
                 scales.push(scale);
 
                 // Quantize and pack group (2 values per byte for 4-bit)

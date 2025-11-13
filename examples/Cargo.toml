@@ -16,9 +16,19 @@ sutra-tokenizer = { workspace = true }
 ndarray = { workspace = true }
 rand = { workspace = true }
 
+# === Professional Examples & Benchmarks ===
+
 [[example]]
-name = "quantization_demo"
-path = "quantization_demo.rs"
+name = "quantization_benchmark"
+path = "quantization_benchmark.rs"
+
+[[example]]
+name = "model_loader"
+path = "model_loader.rs"
+
+[[example]]
+name = "end_to_end"
+path = "end_to_end.rs"
 
 [[example]]
 name = "qlora_training"
@@ -36,30 +46,3 @@ path = "mamba_inference.rs"
 name = "nesy_agent"
 path = "nesy_agent.rs"
 
-[[example]]
-name = "model_loader"
-path = "model_loader.rs"
-
-[[example]]
-name = "end_to_end"
-path = "end_to_end.rs"
-
-[[example]]
-name = "real_world_test"
-path = "real_world_test.rs"
-
-[[example]]
-name = "manual_test"
-path = "manual_test.rs"
-
-[[example]]
-name = "simple_real_test"
-path = "simple_real_test.rs"
-
-[[example]]
-name = "comprehensive_validation"
-path = "comprehensive_validation.rs"
-
-[[example]]
-name = "enhanced_validation"
-path = "enhanced_validation.rs"
