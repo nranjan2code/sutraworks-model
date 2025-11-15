@@ -243,12 +243,42 @@ impl ProductionModelLoader {
                 }))
             },
             ModelArchitecture::RWKV => {
-                // TODO: Implement RWKV weight extraction
-                Err(LoaderError::InvalidConfig("RWKV loading not implemented".to_string()))
+                // Extract RWKV weights
+                let rwkv_weights = RWKVLayerWeights {
+                    att_time_mix_k: get_weight("attention.time_mix_k"),
+                    att_time_mix_v: get_weight("attention.time_mix_v"),
+                    att_time_mix_r: get_weight("attention.time_mix_r"),
+                    att_time_mix_g: get_weight("attention.time_mix_g"),
+                    att_time_decay: get_weight("attention.time_decay"),
+                    att_time_first: get_weight("attention.time_first"),
+                    att_key: get_weight("attention.key.weight"),
+                    att_value: get_weight("attention.value.weight"),
+                    att_receptance: get_weight("attention.receptance.weight"),
+                    att_gate: get_weight("attention.gate.weight"),
+                    att_output: get_weight("attention.output.weight"),
+                    ffn_time_mix_k: get_weight("feed_forward.time_mix_k"),
+                    ffn_time_mix_r: get_weight("feed_forward.time_mix_r"),
+                    ffn_key: get_weight("feed_forward.key.weight"),
+                    ffn_value: get_weight("feed_forward.value.weight"),
+                    ffn_receptance: get_weight("feed_forward.receptance.weight"),
+                };
+                Ok(LayerWeights::RWKV(rwkv_weights))
             },
             ModelArchitecture::Mamba => {
-                // TODO: Implement Mamba weight extraction  
-                Err(LoaderError::InvalidConfig("Mamba loading not implemented".to_string()))
+                // Extract Mamba weights
+                let mamba_weights = MambaLayerWeights {
+                    in_proj: get_weight("in_proj.weight"),
+                    conv1d: get_weight("conv1d.weight"),
+                    conv1d_bias: get_weight("conv1d.bias"),
+                    x_proj: get_weight("x_proj.weight"),
+                    dt_proj: get_weight("dt_proj.weight"),
+                    dt_proj_bias: get_weight("dt_proj.bias"),
+                    a_log: get_weight("A_log"),
+                    d: get_weight("D"),
+                    out_proj: get_weight("out_proj.weight"),
+                    norm: get_weight("norm.weight"),
+                };
+                Ok(LayerWeights::Mamba(mamba_weights))
             },
         }
     }
@@ -301,12 +331,46 @@ pub struct FeedForwardWeights {
 
 #[derive(Clone)]
 pub struct RWKVLayerWeights {
-    // TODO: Define RWKV-specific weights
+    // Attention time-mixing weights
+    pub att_time_mix_k: Option<Tensor>,
+    pub att_time_mix_v: Option<Tensor>,
+    pub att_time_mix_r: Option<Tensor>,
+    pub att_time_mix_g: Option<Tensor>,
+    // RWKV attention parameters
+    pub att_time_decay: Option<Tensor>,
+    pub att_time_first: Option<Tensor>,
+    // Attention projection weights
+    pub att_key: Option<Tensor>,
+    pub att_value: Option<Tensor>,
+    pub att_receptance: Option<Tensor>,
+    pub att_gate: Option<Tensor>,
+    pub att_output: Option<Tensor>,
+    // Feed-forward weights
+    pub ffn_time_mix_k: Option<Tensor>,
+    pub ffn_time_mix_r: Option<Tensor>,
+    pub ffn_key: Option<Tensor>,
+    pub ffn_value: Option<Tensor>,
+    pub ffn_receptance: Option<Tensor>,
 }
 
 #[derive(Clone)]
 pub struct MambaLayerWeights {
-    // TODO: Define Mamba-specific weights
+    // Input projection (x -> 2*d_model)
+    pub in_proj: Option<Tensor>,
+    // 1D convolution weights
+    pub conv1d: Option<Tensor>,
+    pub conv1d_bias: Option<Tensor>,
+    // State space parameters projection
+    pub x_proj: Option<Tensor>,
+    pub dt_proj: Option<Tensor>,
+    pub dt_proj_bias: Option<Tensor>,
+    // SSM parameters
+    pub a_log: Option<Tensor>,  // Log-space A matrix
+    pub d: Option<Tensor>,      // Skip connection
+    // Output projection
+    pub out_proj: Option<Tensor>,
+    // Layer normalization
+    pub norm: Option<Tensor>,
 }
 
 impl LoadedModel {
@@ -349,7 +413,30 @@ impl LoadedModel {
                         return Err(LoaderError::TensorNotFound(format!("layer.{}.norm1", i)));
                     }
                 }
-                _ => {} // TODO: Add validation for other architectures
+                LayerWeights::RWKV(weights) => {
+                    // Validate core RWKV weights
+                    if weights.att_key.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.attention.key", i)));
+                    }
+                    if weights.att_value.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.attention.value", i)));
+                    }
+                    if weights.att_receptance.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.attention.receptance", i)));
+                    }
+                }
+                LayerWeights::Mamba(weights) => {
+                    // Validate core Mamba weights
+                    if weights.in_proj.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.in_proj", i)));
+                    }
+                    if weights.out_proj.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.out_proj", i)));
+                    }
+                    if weights.a_log.is_none() {
+                        return Err(LoaderError::TensorNotFound(format!("layer.{}.A_log", i)));
+                    }
+                }
             }
         }
         

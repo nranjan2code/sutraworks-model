@@ -168,16 +168,17 @@ impl AwqQuantizer {
                     0.0
                 };
 
-                // TODO: Apply salience-aware adjustment to scale (AWQ's key innovation)
-                // For now, use base scale to ensure correctness
-                // In full AWQ: adjust scale based on activation salience to protect important weights
-                let _avg_salience = group_salience.iter().sum::<f32>() / group_salience.len() as f32;
+                // Apply salience-aware scale adjustment (AWQ's key innovation)
+                // Protect important weights by adjusting scale based on activation magnitude
+                let avg_salience = group_salience.iter().sum::<f32>() / group_salience.len() as f32;
+                let salience_factor = 1.0 + (avg_salience.sqrt() * 0.1).min(0.2); // More conservative scaling
+                let adjusted_scale = scale * salience_factor;
                 
-                scales.push(scale);
+                scales.push(adjusted_scale);
 
                 // Quantize and pack group (2 values per byte for 4-bit)
                 for &val in group.iter() {
-                    let qval = ((val / scale) + zero).round().clamp(0.0, qmax_f) as u8;
+                    let qval = ((val / adjusted_scale) + zero).round().clamp(0.0, qmax_f) as u8;
                     
                     // Pack 2 4-bit values per byte
                     let byte_idx = value_idx / 2;

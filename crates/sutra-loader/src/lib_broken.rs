@@ -20,13 +20,9 @@ pub use model_registry::{ModelInfo, ModelRegistry, ModelSource};
 pub use safetensors_loader::{SafetensorsLoader, TensorInfo};
 pub use model_loader::{
     ModelLoader, ModelArchitecture, LoadedWeights, LayerWeights,
-    RwkvLayerWeights, TransformerLayerWeights,
+    RwkvLayerWeights, MambaLayerWeights, TransformerLayerWeights,
 };
-pub use production_loader::{
-    ProductionModelLoader, ModelConfig, StructuredWeights, LoadedModel,
-    RWKVLayerWeights, MambaLayerWeights,
-    AttentionWeights, FeedForwardWeights,
-};
+pub use production_loader::{\n    ProductionModelLoader, ModelConfig, StructuredWeights, LoadedModel,\n    RWKVLayerWeights, MambaLayerWeights,\n    AttentionWeights, FeedForwardWeights,\n};
 
 /// Prelude for convenient imports
 pub mod prelude {

@@ -126,7 +126,7 @@ fn run_benchmark(
             .take(100) // Sample first 100 elements
             .map(|(&expected, &actual)| {
                 if expected.abs() > 1e-5 {
-                    ((expected - actual).abs() / expected.abs())
+                    (expected - actual).abs() / expected.abs()
                 } else {
                     (expected - actual).abs()
                 }

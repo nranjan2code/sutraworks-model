@@ -146,7 +146,7 @@ impl LoraLayer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ndarray::Array;
+
 
     #[test]
     fn test_lora_creation() {

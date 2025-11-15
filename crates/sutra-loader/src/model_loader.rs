@@ -537,7 +537,7 @@ impl ModelLoader {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+
     
     #[test]
     fn test_architecture_detection() {

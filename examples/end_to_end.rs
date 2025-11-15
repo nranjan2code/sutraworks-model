@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-/// End-to-End Example: Complete AI Pipeline
-///
-/// Demonstrates the full workflow:
+//! End-to-End Production Pipeline Demo\n//! \n//! Demonstrates the complete SutraWorks pipeline:
 /// 1. Load model weights (or create random weights)
 /// 2. Tokenize input text
 /// 3. Run inference with quantization
@@ -124,7 +122,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let processed = ops::layer_norm(&embedded, 1e-5)?;
     println!("Applied layer normalization");
 
-    let activated = ops::activations::gelu(&processed);
+    let _activated = ops::activations::gelu(&processed);
     println!("Applied GELU activation");
 
     // Run through model (simplified)
