@@ -6,10 +6,10 @@ use sutra_mamba::{MambaConfig, MambaModel};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Mamba State Space Model Demo ===\n");
 
-    // Use Mamba-3B configuration
-    let config = MambaConfig::mamba_3b();
+    // Use small demo configuration instead of massive 3B model
+    let config = MambaConfig::new(6, 256, 1000); // 6 layers, 256 hidden, 1K vocab
 
-    println!("Mamba-3B Configuration:");
+    println!("Mamba Demo Configuration:");
     println!("  Layers: {}", config.num_layers);
     println!("  Hidden size: {}", config.hidden_size);
     println!("  State size: {}", config.state_size);
@@ -18,8 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Memory estimation
     let memory = config.estimate_memory();
     println!(
-        "\nMemory estimate: {:.2} GB",
-        memory as f64 / 1_073_741_824.0
+        "\nMemory estimate: {:.2} MB",
+        memory as f64 / 1_048_576.0
     );
 
     // Complexity analysis

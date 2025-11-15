@@ -20,7 +20,7 @@ impl GradientAccumulator {
 
     pub fn accumulate(&mut self, grads: &[ArrayD<f32>]) -> Result<()> {
         if self.gradients.is_empty() {
-            self.gradients = grads.iter().map(|g| g.clone()).collect();
+            self.gradients = grads.to_vec();
         } else {
             for (acc, grad) in self.gradients.iter_mut().zip(grads.iter()) {
                 *acc = &*acc + grad;

@@ -111,11 +111,11 @@ impl AwqQuantizer {
         let shape = weights_2d.shape();
         let (out_features, in_features) = (shape[0], shape[1]);
         let group_size = self.config.group_size;
-        let n_groups = (in_features + group_size - 1) / group_size;
+        let n_groups = in_features.div_ceil(group_size);
 
         // Calculate packed size (2 values per byte for 4-bit)
         let total_values = out_features * in_features;
-        let packed_size = (total_values + 1) / 2; // Ceil division for odd counts
+        let packed_size = total_values.div_ceil(2); // Ceil division for odd counts
         
         let mut qweights_packed = vec![0u8; packed_size];
         let mut scales = Vec::with_capacity(out_features * n_groups);

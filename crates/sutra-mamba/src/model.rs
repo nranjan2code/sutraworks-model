@@ -201,8 +201,13 @@ impl MambaModel {
 
     /// Project hidden state to vocabulary logits
     fn output_projection(&self, x: &Array1<f32>) -> Vec<f32> {
-        // Matrix multiply with output weights (vocab_size x hidden_size) * (hidden_size,) = (vocab_size,)
-        self.output_weight.dot(x).to_vec()
+        // Matrix multiply with embedding weights (vocab_size x hidden_size) * (hidden_size,) = (vocab_size,)
+        // Use the original embedding matrix, not the transposed one
+        let mut logits = vec![0.0; self.config.vocab_size];
+        for (i, row) in self.token_embedding.rows().into_iter().enumerate() {
+            logits[i] = x.dot(&row);
+        }
+        logits
     }
 
     /// Load model weights from checkpoint
@@ -228,7 +233,7 @@ impl MambaModel {
     fn rand() -> f32 {
         use std::cell::Cell;
         thread_local! {
-            static SEED: Cell<u64> = Cell::new(0xfedcba0987654321);
+            static SEED: Cell<u64> = const { Cell::new(0xfedcba0987654321) };
         }
         SEED.with(|seed| {
             let mut s = seed.get();

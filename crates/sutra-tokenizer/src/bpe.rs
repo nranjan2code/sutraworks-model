@@ -228,8 +228,8 @@ impl BpeTokenizer {
 
         // Fill in remaining bytes with shifted unicode
         for b in 0..=255u8 {
-            if !byte_encoder.contains_key(&b) {
-                byte_encoder.insert(b, char::from_u32(256 + n).unwrap());
+            if let std::collections::hash_map::Entry::Vacant(e) = byte_encoder.entry(b) {
+                e.insert(char::from_u32(256 + n).unwrap());
                 n += 1;
             }
         }

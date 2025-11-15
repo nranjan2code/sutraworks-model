@@ -1,5 +1,6 @@
-use std::collections::HashMap;
-//! End-to-End Production Pipeline Demo\n//! \n//! Demonstrates the complete SutraWorks pipeline:
+/// End-to-End Production Pipeline Demo
+///
+/// Demonstrates the complete SutraWorks pipeline:
 /// 1. Load model weights (or create random weights)
 /// 2. Tokenize input text
 /// 3. Run inference with quantization

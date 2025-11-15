@@ -1,8 +1,7 @@
-/// Quantized operations for efficient inference
-/// 
-/// These operations work directly on quantized tensors,
-/// dequantizing on-the-fly for computation
-
+//! Quantized operations for efficient inference
+//!
+//! These operations work directly on quantized tensors,
+//! dequantizing on-the-fly for computation
 use crate::awq::QuantizedWeights;
 use ndarray::{Array1, Array2};
 use sutra_core::{Result, SutraError, Tensor};
@@ -42,7 +41,7 @@ pub fn quantized_matmul(a: &Tensor, b_quantized: &QuantizedWeights) -> Result<Te
     // Dequantize B column-wise and compute
     // This is more memory-efficient than dequantizing the entire matrix
     let group_size = b_quantized.group_size;
-    let n_groups = (n + group_size - 1) / group_size;
+    let n_groups = n.div_ceil(group_size);
     
     for col_idx in 0..n {
         // Dequantize one column of B

@@ -38,7 +38,7 @@ impl Dequantizer {
     pub fn dequantize_awq(&self, qweights: &QuantizedWeights) -> Result<Tensor> {
         let (out_features, in_features) = (qweights.shape[0], qweights.shape[1]);
         let group_size = qweights.group_size;
-        let n_groups = (in_features + group_size - 1) / group_size;
+        let n_groups = in_features.div_ceil(group_size);
 
         let mut output = Vec::with_capacity(out_features * in_features);
         let mut value_idx = 0;

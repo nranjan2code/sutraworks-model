@@ -47,25 +47,26 @@ impl RwkvAttention {
     }
     
     /// Load weights from checkpoint
+    #[allow(clippy::too_many_arguments)]
     pub fn load_weights(
         &mut self,
         time_mix_k: Array1<f32>,
         time_mix_v: Array1<f32>,
         time_mix_r: Array1<f32>,
-        key: Array2<f32>,
-        value: Array2<f32>,
-        receptance: Array2<f32>,
-        output: Array2<f32>,
+        key_weight: Array2<f32>,
+        value_weight: Array2<f32>,
+        receptance_weight: Array2<f32>,
+        output_weight: Array2<f32>,
         time_decay: Array1<f32>,
         time_first: Array1<f32>,
     ) {
         self.time_mix_k = time_mix_k;
         self.time_mix_v = time_mix_v;
         self.time_mix_r = time_mix_r;
-        self.key = key;
-        self.value = value;
-        self.receptance = receptance;
-        self.output = output;
+        self.key = key_weight;
+        self.value = value_weight;
+        self.receptance = receptance_weight;
+        self.output = output_weight;
         self.time_decay = time_decay;
         self.time_first = time_first;
     }
@@ -172,7 +173,7 @@ impl WkvState {
 mod rand {
     use std::cell::Cell;
     thread_local! {
-        static SEED: Cell<u64> = Cell::new(0x123456789abcdef0);
+        static SEED: Cell<u64> = const { Cell::new(0x123456789abcdef0) };
     }
     
     pub fn random<T>() -> T 

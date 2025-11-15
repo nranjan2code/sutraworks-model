@@ -1,8 +1,7 @@
-/// Production model loader for real HuggingFace model checkpoints
-///
-/// This module implements actual model loading from real downloaded models,
-/// replacing the dummy/synthetic data with genuine model weights.
-
+//! Production model loader for real HuggingFace model checkpoints
+//!
+//! This module implements actual model loading from real downloaded models,
+//! replacing the dummy/synthetic data with genuine model weights.
 use crate::safetensors_loader::SafetensorsLoader;
 use crate::error::{LoaderError, Result};
 use sutra_core::Tensor;
@@ -69,6 +68,12 @@ pub struct FeedForwardMapping {
     pub down_proj: String,
 }
 
+impl Default for ModelRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ModelRegistry {
     /// Create a new model registry with production models
     pub fn new() -> Self {
@@ -129,6 +134,12 @@ impl ModelRegistry {
 /// Production model loader that loads real weights
 pub struct ProductionModelLoader {
     registry: ModelRegistry,
+}
+
+impl Default for ProductionModelLoader {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ProductionModelLoader {
@@ -262,7 +273,7 @@ impl ProductionModelLoader {
                     ffn_value: get_weight("feed_forward.value.weight"),
                     ffn_receptance: get_weight("feed_forward.receptance.weight"),
                 };
-                Ok(LayerWeights::RWKV(rwkv_weights))
+                Ok(LayerWeights::RWKV(Box::new(rwkv_weights)))
             },
             ModelArchitecture::Mamba => {
                 // Extract Mamba weights
@@ -302,7 +313,7 @@ pub struct StructuredWeights {
 #[derive(Clone)]
 pub enum LayerWeights {
     Transformer(TransformerLayerWeights),
-    RWKV(RWKVLayerWeights),
+    RWKV(Box<RWKVLayerWeights>),
     Mamba(MambaLayerWeights),
 }
 
@@ -377,9 +388,9 @@ impl LoadedModel {
     /// Get model info
     pub fn info(&self) -> String {
         format!(
-            "Model: {} ({})\nLayers: {}\nHidden size: {}\nVocab size: {}",
+            "Model: {} ({:?})\nLayers: {}\nHidden size: {}\nVocab size: {}",
             self.config.name,
-            format!("{:?}", self.config.architecture),
+            self.config.architecture,
             self.config.num_layers,
             self.config.hidden_size,
             self.config.vocab_size

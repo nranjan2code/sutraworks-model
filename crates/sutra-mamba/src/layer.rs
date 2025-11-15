@@ -31,7 +31,7 @@ impl MambaLayer {
         let scale = (2.0 / config.hidden_size as f32).sqrt();
         
         let ssm = StateSpaceModel::new(
-            config.hidden_size,
+            expanded_size,  // Use expanded size since that's what gets passed to forward
             config.state_size,
             config.expand_factor,
         );
@@ -184,7 +184,7 @@ impl MambaLayer {
     fn rand() -> f32 {
         use std::cell::Cell;
         thread_local! {
-            static SEED: Cell<u64> = Cell::new(0x0123456789abcdef);
+            static SEED: Cell<u64> = const { Cell::new(0x0123456789abcdef) };
         }
         SEED.with(|seed| {
             let mut s = seed.get();

@@ -93,7 +93,7 @@ impl RwkvFfn {
 mod rand {
     use std::cell::Cell;
     thread_local! {
-        static SEED: Cell<u64> = Cell::new(0x987654321fedcba0);
+        static SEED: Cell<u64> = const { Cell::new(0x987654321fedcba0) };
     }
     
     pub fn random<T>() -> T 

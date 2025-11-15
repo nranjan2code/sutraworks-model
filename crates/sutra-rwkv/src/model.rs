@@ -193,8 +193,13 @@ impl RwkvModel {
 
     /// Project hidden state to vocabulary logits
     fn output_projection(&self, x: &Array1<f32>) -> Vec<f32> {
-        // Matrix multiply with output weights (vocab_size x hidden_size) * (hidden_size,) = (vocab_size,)
-        self.output_weight.dot(x).to_vec()
+        // Matrix multiply with output weights (hidden_size x vocab_size) * (hidden_size,) = (vocab_size,)
+        // Note: output_weight is transposed embedding, so we need x.dot(output_weight)
+        let mut logits = vec![0.0; self.config.vocab_size];
+        for (i, row) in self.token_embedding.rows().into_iter().enumerate() {
+            logits[i] = x.dot(&row);
+        }
+        logits
     }
 
     /// Load model weights from checkpoint
@@ -221,7 +226,7 @@ impl RwkvModel {
 mod rand {
     use std::cell::Cell;
     thread_local! {
-        static SEED: Cell<u64> = Cell::new(0x1234567890abcdef);
+        static SEED: Cell<u64> = const { Cell::new(0x1234567890abcdef) };
     }
     
     pub fn random<T>() -> T 

@@ -1,10 +1,9 @@
-/// Production model loader that maps HuggingFace checkpoints to model architectures
-///
-/// Handles:
-/// - RWKV model weight loading with proper layer mapping
-/// - Mamba model weight loading with architecture-specific keys
-/// - Transformer-style models (GPT, LLaMA, etc.)
-
+//! Production model loader that maps HuggingFace checkpoints to model architectures
+//!
+//! Handles:
+//! - RWKV model weight loading with proper layer mapping
+//! - Mamba model weight loading with architecture-specific keys
+//! - Transformer-style models (GPT, LLaMA, etc.)
 use crate::safetensors_loader::SafetensorsLoader;
 use crate::error::{LoaderError, Result};
 use std::path::Path;
@@ -34,7 +33,7 @@ pub struct LoadedWeights {
 /// Weights for a single transformer/RWKV/Mamba layer
 #[derive(Debug, Clone)]
 pub enum LayerWeights {
-    RWKV(RwkvLayerWeights),
+    RWKV(Box<RwkvLayerWeights>),
     Mamba(MambaLayerWeights),
     Transformer(TransformerLayerWeights),
 }
@@ -242,7 +241,7 @@ impl ModelLoader {
                 ffn_receptance: load_or_zeros_2d(&format!("{}.ffn.receptance.weight", prefix), hidden_size, hidden_size),
             };
             
-            layer_weights.push(LayerWeights::RWKV(rwkv_layer));
+            layer_weights.push(LayerWeights::RWKV(Box::new(rwkv_layer)));
         }
         
         Ok(LoadedWeights {

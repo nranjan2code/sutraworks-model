@@ -6,14 +6,14 @@ use sutra_rwkv::{RwkvConfig, RwkvModel, RwkvState};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== RWKV Inference Demo ===\n");
 
-    // Configure RWKV model
+    // Configure small RWKV model for demo
     let config = RwkvConfig::new(
-        24,    // num_layers
-        2048,  // hidden_size
-        50000, // vocab_size
+        6,    // num_layers
+        256,  // hidden_size  
+        1000, // vocab_size
     );
 
-    println!("RWKV Configuration:");
+    println!("RWKV Demo Configuration:");
     println!("  Layers: {}", config.num_layers);
     println!("  Hidden size: {}", config.hidden_size);
     println!("  Vocab size: {}", config.vocab_size);
@@ -22,8 +22,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Memory estimation
     let memory = config.estimate_memory();
     println!(
-        "\nMemory estimate: {:.2} GB",
-        memory as f64 / 1_073_741_824.0
+        "\nMemory estimate: {:.2} MB",
+        memory as f64 / 1_048_576.0
     );
 
     // Create model

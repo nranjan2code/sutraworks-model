@@ -135,9 +135,9 @@ impl ModelDownloader {
         let mut response = self.client.get(url).send()?;
 
         if !response.status().is_success() {
-            return Err(LoaderError::Download(reqwest::Error::from(
+              return Err(LoaderError::Download(
                 response.error_for_status().unwrap_err(),
-            )));
+            ));
         }
 
         let total_size = response.content_length().unwrap_or(0);

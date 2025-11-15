@@ -170,9 +170,9 @@ impl SafetensorsLoader {
     }
 
     /// Convert bytes to Vec<f32> with alignment-safe conversion
-    fn bytes_to_vec<T: Clone>(bytes: &[u8]) -> Vec<T> 
+    fn bytes_to_vec<T>(bytes: &[u8]) -> Vec<T> 
     where
-        T: From<f32>,
+        T: Clone + From<f32>,
     {
         // For f32 specifically, use from_le_bytes to avoid alignment UB
         let count = bytes.len() / 4;
