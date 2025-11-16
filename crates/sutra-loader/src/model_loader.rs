@@ -542,6 +542,6 @@ mod tests {
     fn test_architecture_detection() {
         // Test would require actual model files
         // Placeholder test
-        assert!(true);
+        // Test passes
     }
 }

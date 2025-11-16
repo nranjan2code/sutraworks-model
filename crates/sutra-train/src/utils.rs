@@ -13,7 +13,7 @@ pub fn format_bytes(bytes: u64) -> String {
     
     let size = bytes as f64 / 1024_f64.powi(unit_index as i32);
     
-    if unit_index < 2 {
+    if unit_index == 0 {
         format!("{} {}", bytes, UNITS[unit_index])
     } else {
         format!("{:.1} {}", size, UNITS[unit_index])
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn test_format_bytes() {
         assert_eq!(format_bytes(0), "0 B");
-        assert_eq!(format_bytes(1024), "1024 B");
+        assert_eq!(format_bytes(1024), "1.0 KB");
         assert_eq!(format_bytes(1536), "1.5 KB");
         assert_eq!(format_bytes(1048576), "1.0 MB");
     }

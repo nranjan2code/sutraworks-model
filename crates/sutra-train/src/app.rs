@@ -323,7 +323,7 @@ impl TrainingApp {
     fn export_model(&mut self) {
         if let Some(path) = rfd::FileDialog::new()
             .add_filter("Model Files", &["safetensors", "onnx", "pt"])
-            .set_file_name(&format!("{}.safetensors", self.config.output.model_name))
+            .set_file_name(format!("{}.safetensors", self.config.output.model_name))
             .save_file()
         {
             let output_dir = &self.config.output.output_dir;
@@ -830,7 +830,7 @@ impl TrainingApp {
         // Calculate total steps
         let samples_per_file = 1000; // Estimate
         let total_samples = data_files.len() * samples_per_file;
-        let steps_per_epoch = (total_samples + config.training.batch_size - 1) / config.training.batch_size;
+        let steps_per_epoch = total_samples.div_ceil(config.training.batch_size);
         let total_steps = steps_per_epoch * config.training.epochs;
         
         // Start training
@@ -867,7 +867,7 @@ impl TrainingApp {
                 }
                 
                 // Periodic evaluation
-                if (global_step + 1) % config.training.eval_every == 0 {
+                if (global_step + 1).is_multiple_of(config.training.eval_every) {
                     let val_loss = loss * 1.1; // Validation typically slightly higher
                     if let Ok(mut prog) = progress.lock() {
                         prog.update_validation(val_loss);
@@ -875,7 +875,7 @@ impl TrainingApp {
                 }
                 
                 // Logging
-                if (global_step + 1) % 100 == 0 {
+                if (global_step + 1).is_multiple_of(100) {
                     trainer.log(format!(
                         "Epoch {}/{}, Step {}/{}, Loss: {:.4}, LR: {:.6}",
                         epoch + 1,

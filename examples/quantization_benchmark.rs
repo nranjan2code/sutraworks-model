@@ -5,7 +5,6 @@
 /// - Memory compression measurements
 /// - Inference speed benchmarks
 /// - Support for different matrix sizes (embedding, attention, MLP, vocab)
-
 use ndarray::{Array, IxDyn};
 use std::time::Instant;
 use sutra_core::{DType, Tensor, ops};

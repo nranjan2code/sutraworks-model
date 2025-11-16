@@ -315,7 +315,7 @@ mod tests {
     fn test_default_registry() {
         let registry = ModelRegistry::with_defaults();
         let models = registry.list();
-        assert!(models.len() > 0);
+        assert!(!models.is_empty());
 
         // Check RWKV models exist
         assert!(registry.get("rwkv-169m").is_ok());

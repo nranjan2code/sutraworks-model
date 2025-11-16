@@ -72,10 +72,20 @@ impl DataManager {
                     "csv" => {
                         // Count lines minus header for CSV
                         let lines = content.lines().count();
-                        total_samples += if lines > 1 { lines - 1 } else { 0 };
+                        total_samples += lines.saturating_sub(1);
                     }
-                    "txt" | "json" | _ => {
+                    "txt" => {
                         // For text files, estimate by splitting on common delimiters
+                        let content = std::fs::read_to_string(file_path).unwrap_or_default();
+                        let lines = content.lines().count();
+                        total_samples += lines;
+                    }
+                    "json" => {
+                        // For JSON files, count as single sample
+                        total_samples += 1;
+                    }
+                    _ => {
+                        // For unknown formats, estimate by splitting on common delimiters
                         // or count as single sample for JSON
                         if extension == "json" {
                             total_samples += 1;
@@ -109,7 +119,7 @@ impl DataManager {
     pub fn estimate_training_time(&self, epochs: usize, batch_size: usize) -> std::time::Duration {
         // Rough estimation based on sample count and hardware
         let samples_per_epoch = self.sample_count;
-        let batches_per_epoch = (samples_per_epoch + batch_size - 1) / batch_size;
+        let batches_per_epoch = samples_per_epoch.div_ceil(batch_size);
         let total_batches = batches_per_epoch * epochs;
         
         // Estimate ~100ms per batch on M1/M2 Mac

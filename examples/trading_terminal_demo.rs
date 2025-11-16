@@ -8,7 +8,6 @@
 /// - Real-time strategy signals
 ///
 /// Run: cargo run --example trading_terminal_demo --release
-
 use std::time::Instant;
 use sutra_core::{DType, Tensor};
 use sutra_mamba::{MambaModel, MambaConfig};
@@ -60,7 +59,7 @@ fn print_header(update_count: u32) {
     println!("═══════════════════════════════════════════════════════════════════════════════");
     println!("\x1b[0m"); // Reset
     
-    let live_indicator = if update_count % 2 == 0 { "\x1b[92m●\x1b[0m" } else { "\x1b[32m●\x1b[0m" }; // Blinking effect
+    let live_indicator = if update_count.is_multiple_of(2) { "\x1b[92m●\x1b[0m" } else { "\x1b[32m●\x1b[0m" }; // Blinking effect
     println!("\x1b[90m⏰ {}\x1b[0m  {} LIVE  \x1b[90m│ Updates: {}\x1b[0m", 
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S EST"),
         live_indicator,
@@ -386,7 +385,7 @@ fn load_market_data() -> MarketData {
     
     // Calculate historical volatility
     let returns: Vec<f64> = bars.windows(2)
-        .map(|w| ((w[1].close - w[0].close) / w[0].close))
+        .map(|w| (w[1].close - w[0].close) / w[0].close)
         .collect();
     let mean_return = returns.iter().sum::<f64>() / returns.len() as f64;
     let variance = returns.iter()

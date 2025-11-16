@@ -7,7 +7,6 @@
 /// - Real-time progress monitoring
 /// - Model templates for common tasks
 /// - One-click export and deployment
-
 mod app;
 mod config;
 mod data;
