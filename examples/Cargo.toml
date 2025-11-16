@@ -15,6 +15,7 @@ sutra-loader = { workspace = true }
 sutra-tokenizer = { workspace = true }
 ndarray = { workspace = true }
 rand = { workspace = true }
+chrono = "0.4"
 
 # === Professional Examples & Benchmarks ===
 
@@ -45,4 +46,8 @@ path = "mamba_inference.rs"
 [[example]]
 name = "nesy_agent"
 path = "nesy_agent.rs"
+
+[[example]]
+name = "trading_terminal_demo"
+path = "trading_terminal_demo.rs"
 

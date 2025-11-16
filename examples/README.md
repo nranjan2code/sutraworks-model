@@ -39,6 +39,27 @@ Load models from HuggingFace cache or safetensors files.
 
 Complete inference pipeline: tokenize → embed → infer → quantize → decode
 
+### 💼 Live Trading Terminal
+**File**: `trading_terminal_demo.rs`
+
+Professional trading terminal with real-time updates:
+- ✅ Live market data feed (2-second auto-refresh)
+- ✅ Real backtest engine with P&L tracking
+- ✅ Sharpe ratio, Sortino, Max Drawdown, VaR
+- ✅ ASCII price charts and equity curves
+- ✅ ANSI color-coded interface (green profits, red losses)
+- ✅ BUY/SELL/HOLD signals from Mamba AI model
+- ✅ Bloomberg Terminal-style professional UI
+
+**Demo Features**:
+- Continuous screen updates (like Bloomberg/TradingView)
+- Real inference latency <1ms
+- Trade history with entry/exit prices
+- Strategy performance comparison
+- Live confidence indicators
+
+**Usage**: Press Ctrl+C to exit the live terminal
+
 ### 🎯 Specialized Examples
 
 - **QLoRA Training** (`qlora_training.rs`): Parameter-efficient fine-tuning
