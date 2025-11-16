@@ -10,6 +10,7 @@ members = [
     "crates/sutra-loader",
     "crates/sutra-tokenizer",
     "crates/sutra-training",
+    "crates/sutra-train",
     "examples",
 ]
 
@@ -41,6 +42,15 @@ memmap2 = "0.9"
 # SIMD acceleration
 packed_simd = "0.3"
 
+# GUI framework
+egui = "0.28"
+eframe = { version = "0.28", default-features = false, features = ["default_fonts", "glow"] }
+rfd = "0.14"  # File dialogs
+plotters = "0.3"  # Plotting for training metrics
+plotters-bitmap = "0.3"
+image = "0.24"  # Image handling
+tokio = { version = "1.0", features = ["full"] }  # Async runtime
+
 # Internal crates
 sutra-core = { path = "crates/sutra-core" }
 sutra-quantize = { path = "crates/sutra-quantize" }
@@ -51,6 +61,7 @@ sutra-nesy = { path = "crates/sutra-nesy" }
 sutra-loader = { path = "crates/sutra-loader" }
 sutra-tokenizer = { path = "crates/sutra-tokenizer" }
 sutra-training = { path = "crates/sutra-training" }
+sutra-train = { path = "crates/sutra-train" }
 
 [profile.release]
 opt-level = 3

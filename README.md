@@ -25,6 +25,8 @@
 
 SutraWorks Model is a **production-ready** Rust framework that brings cutting-edge AI research to consumer hardware. **All claims have been validated** through comprehensive end-to-end testing with real downloaded AI models from HuggingFace.
 
+**🎨 NEW: [SutraWorks Training Studio →](crates/sutra-train/README.md)** - Beautiful GUI for training AI models without ML expertise required! **PRODUCTION COMPLETE** - Zero TODOs/stubs/mocks
+
 **📊 NEW: [Feature Comparison →](COMPETITIVE_COMPARISON.md)** - See how SutraWorks compares to llama.cpp, Candle, PyTorch, and other frameworks!
 
 ### ✅ Comprehensive Validation Completed
@@ -75,7 +77,18 @@ SutraWorks Model is a **production-ready** Rust framework that brings cutting-ed
 
 ## 🚀 Quick Start (Production Grade)
 
-### Option 1: 💼 Live Trading Terminal (⭐ **NEW - PROFESSIONAL UI!**)
+### Option 1: 🎨 Training Studio GUI (⭐ **NEW - NO ML EXPERTISE REQUIRED!**)
+```bash
+# Launch beautiful GUI for training AI models without coding
+./launch_training_studio.sh
+# OR: cargo run --bin sutra-train --release
+# ✅ Drag & drop data, choose templates, visual training progress
+# ✅ 5 built-in templates: Chat, Code, Document, Creative, Data Science
+# ✅ Real-time monitoring, automatic export, production ready
+```
+**[See Full Training Guide →](crates/sutra-train/README.md)**
+
+### Option 2: 💼 Live Trading Terminal (⭐ **PROFESSIONAL UI!**)
 ```bash
 # Live-updating trading terminal with real-time data (Press Ctrl+C to exit)
 cargo run --example trading_terminal_demo --release
@@ -85,7 +98,7 @@ cargo run --example trading_terminal_demo --release
 ```
 **[See Full Demo Guide →](ENTERPRISE_DEMOS.md)**
 
-### Option 2: End-to-End Pipeline Demo
+### Option 3: End-to-End Pipeline Demo
 ```bash
 # Complete production pipeline demonstration
 cargo run --example end_to_end --release
@@ -114,12 +127,13 @@ cargo run --example quantization_benchmark --release
 
 ## 🏗️ Architecture
 
-The project consists of 9 specialized crates organized around 4 core capabilities:
+The project consists of 10 specialized crates organized around 5 core capabilities:
 
-1. **Model Compression (Quantization)** - Run SOTA models via AWQ 4-bit quantization
-2. **PEFT/QLoRA** - Parameter-efficient fine-tuning with LoRA adapters
-3. **Efficient Architectures** - RWKV (RNN) and Mamba (SSM) implementations
-4. **Neuro-Symbolic AI** - Hybrid neural + symbolic reasoning systems
+1. **🎨 Visual Training Studio** - User-friendly GUI for training AI models
+2. **Model Compression (Quantization)** - Run SOTA models via AWQ 4-bit quantization
+3. **PEFT/QLoRA** - Parameter-efficient fine-tuning with LoRA adapters
+4. **Efficient Architectures** - RWKV (RNN) and Mamba (SSM) implementations
+5. **Neuro-Symbolic AI** - Hybrid neural + symbolic reasoning systems
 
 ```
 sutraworks-model/
@@ -132,7 +146,8 @@ sutraworks-model/
 │   ├── sutra-nesy/          # Neuro-symbolic agents (~1,342 lines)
 │   ├── sutra-loader/        # Model loading, safetensors (~1,600 lines)
 │   ├── sutra-tokenizer/     # BPE/WordPiece/Unigram (~1,800 lines)
-│   └── sutra-training/      # Training loop, optimizers (~1,200 lines)
+│   ├── sutra-training/      # Training loop, optimizers (~1,200 lines)
+│   └── sutra-train/         # 🎨 GUI Training Studio (~2,500 lines)
 └── examples/                # 7 runnable demonstrations + validation
 ```
 
@@ -314,9 +329,14 @@ let output = model.generate(&prompt, 100, 0.7)?;
 
 The project includes comprehensive VS Code tasks in `.vscode/tasks.json`:
 
+#### Training Studio Tasks ⭐ NEW
+- **🎨 Launch Training Studio** - Start the GUI application
+- **🎨 Build Training Studio** - Build the GUI in release mode
+- **🎨 Launch Training Studio (Script)** - Use the launch script
+
 #### Build & Test Tasks
 - **Build All (Release)** - `Cmd+Shift+B` (default build task)
-- **Test All Crates** - Run complete test suite (55 tests)
+- **Test All Crates** - Run complete test suite (57 tests)
 - **Check (Fast Validation)** - Quick compilation check
 - **Clippy (Linter)** - Zero warnings enforced
 

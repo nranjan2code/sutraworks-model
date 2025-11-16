@@ -137,6 +137,31 @@ jobs:
         run: cargo run --example production_validation --release
         timeout-minutes: 10
 
+  training-studio:
+    name: Training Studio GUI
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev \
+            libxkbcommon-dev libssl-dev libfontconfig1-dev
+      
+      - name: Build Training Studio
+        run: cargo build --bin sutra-train --release
+      
+      - name: Test Training Studio (build only, no GUI test)
+        run: cargo check --bin sutra-train
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
