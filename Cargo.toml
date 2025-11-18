@@ -11,6 +11,7 @@ members = [
     "crates/sutra-tokenizer",
     "crates/sutra-training",
     "crates/sutra-train",
+    "crates/sutra-demo",
     "examples",
 ]
 
@@ -62,6 +63,7 @@ sutra-loader = { path = "crates/sutra-loader" }
 sutra-tokenizer = { path = "crates/sutra-tokenizer" }
 sutra-training = { path = "crates/sutra-training" }
 sutra-train = { path = "crates/sutra-train" }
+sutra-demo = { path = "crates/sutra-demo" }
 
 [profile.release]
 opt-level = 3
