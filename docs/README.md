@@ -36,6 +36,7 @@ Welcome to the comprehensive documentation for SutraWorks Model - a production-r
 
 ### 💡 Examples
 - **[Live Trading Terminal](examples/trading-terminal.md)** - Bloomberg-style trading interface
+- **[Trading Terminal Step-by-Step Guide](examples/trading-terminal-guide.md)** - ⭐ **NEW!** Detailed breakdown of each phase
 - **[End-to-End Pipeline](examples/e2e-pipeline.md)** - Complete workflow
 - **[Quantization Benchmark](examples/quantization-benchmark.md)** - Performance testing
 - **[Model Inference](examples/inference.md)** - RWKV and Mamba inference

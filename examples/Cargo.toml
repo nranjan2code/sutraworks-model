@@ -51,3 +51,7 @@ path = "nesy_agent.rs"
 name = "trading_terminal_demo"
 path = "trading_terminal_demo.rs"
 
+[[example]]
+name = "review_intelligence_demo"
+path = "review_intelligence_demo.rs"
+

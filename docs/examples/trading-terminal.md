@@ -2,6 +2,8 @@
 
 A professional Bloomberg-style trading terminal demonstrating real-time AI-powered trading decisions with comprehensive backtesting and performance metrics.
 
+📚 **NEW!** [Complete Step-by-Step Guide](trading-terminal-guide.md) - Detailed explanation of what happens at each phase and what you're seeing on screen!
+
 ## Overview
 
 This example showcases SutraWorks' enterprise capabilities through a live, interactive trading terminal that processes real-time market data and generates trading signals using the Mamba state space model.

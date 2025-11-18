@@ -17,14 +17,22 @@ cargo run --example trading_terminal_demo --release
 
 **File**: `examples/trading_terminal_demo.rs`
 
+📚 **[Complete Step-by-Step Guide](../examples/trading-terminal-guide.md)** - Detailed explanation of what happens at each step!
+
+### 1. 💼 Live Trading Terminal (⭐ START HERE)
+
+**File**: `examples/trading_terminal_demo.rs`
+
+📚 **[Complete Step-by-Step Guide](../examples/trading-terminal-guide.md)** - Detailed explanation of what happens at each step!
+
 **What it demonstrates**:
-- ✅ Professional Bloomberg-style trading interface
-- ✅ Real-time market data with 2-second auto-refresh
-- ✅ Complete backtest engine with P&L tracking
+- ✅ Professional Bloomberg-style trading interface with persistent display
+- ✅ Real-time candlestick charts (OHLC) with green/red color coding
+- ✅ Live market data with realistic momentum and trend simulation (2-second updates)
+- ✅ Complete backtest engine with P&L tracking and trade-by-trade breakdown
 - ✅ Real performance metrics: Sharpe ratio, Sortino, Max Drawdown, VaR
-- ✅ ASCII price charts and equity curves
-- ✅ ANSI color-coded display (green profits, red losses)
-- ✅ Live BUY/SELL/HOLD signals from Mamba AI model
+- ✅ ANSI color-coded display (green profits, red losses, fixed layout)
+- ✅ Live BUY/SELL/HOLD signals from Mamba AI model (<1ms inference)
 
 **Run it**:
 ```bash
@@ -34,12 +42,35 @@ cargo run --example trading_terminal_demo --release
 
 **Live Terminal Features**:
 ```
-📊 Live Market Data: Price updates every 2 seconds with ASCII charts
+📊 Live Market Data: Price updates every 2 seconds with candlestick charts
 💰 Real P&L Tracking: Actual backtest with trade-by-trade breakdown
 📈 Performance Metrics: Sharpe -2.27, Max DD 7.46%, Win Rate 66.7%
 🤖 AI Signals: BUY/SELL/HOLD from real Mamba model inference (<1ms)
-🎨 Professional UI: ANSI colors, Bloomberg-style layout
+🎨 Professional UI: ANSI colors, Bloomberg-style fixed layout
+🕯️ Candlestick Charts: OHLC visualization with bullish (green) / bearish (red) candles
 ```
+
+**Step-by-Step Breakdown**:
+1. **Initialization** (5 seconds):
+   - Load 4-layer Mamba model (64 hidden dimensions)
+   - Apply AWQ 4-bit quantization (7.42x compression)
+   - Generate 200 bars of realistic market data
+   - Run backtest with professional risk metrics
+
+2. **Terminal Display** (persistent layout):
+   - Market Overview: Price, volume, bid/ask, high/low
+   - Candlestick Chart: 60-candle OHLC visualization
+   - Trading Signals: AI-powered BUY/SELL/HOLD with confidence
+   - Portfolio Status: P&L, position, trade statistics
+   - System Status: Performance metrics and risk measures
+
+3. **Live Updates** (every 2 seconds):
+   - New price calculated with momentum + trend + volatility
+   - Model inference generates trading signal (<1ms)
+   - Display updates with ANSI cursor positioning (no screen clearing)
+   - All metrics recalculated and refreshed
+
+**👉 [See Complete Step-by-Step Guide](../examples/trading-terminal-guide.md) for detailed explanations!**
 
 **What's Real vs Simulated**:
 - ✅ **REAL**: Model inference (Mamba SSM with selective scan)
