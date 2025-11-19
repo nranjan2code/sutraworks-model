@@ -1,57 +1,55 @@
 # Multi-stage Docker build for SutraWorks HTTP API server
-# Based on advanced AI framework with production security hardening
+# Use Rust nightly for edition2024 support + Debian bookworm runtime
 
-FROM rust:1.75-slim as builder
+FROM rustlang/rust:nightly-bookworm AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     pkg-config \
+    build-essential \
+    g++ \
     libssl-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create app user for security
-RUN useradd -r -s /bin/false -m sutraworks
-
-# Set up build directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy workspace configuration
-COPY Cargo.toml .
-COPY Cargo.lock .
+COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/
+COPY examples/ examples/
 
-# Build the sutra-server binary
+# Build dependencies first (caching layer)
 RUN cargo build --release --bin sutra-server
 
-# Runtime stage - minimal image
+# Runtime stage - Use same Debian version (bookworm)
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
+    libgcc-s1 \
+    libstdc++6 \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN useradd -r -s /bin/false -m sutraworks
+RUN useradd -m -s /bin/bash sutraworks && \
+    mkdir -p /app && \
+    chown -R sutraworks:sutraworks /app
 
 # Copy binary from builder
-COPY --from=builder /usr/src/app/target/release/sutra-server /usr/local/bin/sutra-server
+COPY --from=builder /app/target/release/sutra-server /app/sutra-server
 
-# Set binary permissions
-RUN chmod +x /usr/local/bin/sutra-server
-
-# Switch to non-root user
+WORKDIR /app
 USER sutraworks
 
-# Expose port for HTTP server
 EXPOSE 8003
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8003/health || exit 1
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:8003/health || exit 1
-
-# Default command - serve with RWKV model
-CMD ["sutra-server", "serve", "--port", "8003", "--model", "rwkv", "--warmup"]
+CMD ["/app/sutra-server", "serve", "--port", "8003", "--model", "rwkv", "--warmup"]
 
 # Labels for container metadata
 LABEL org.opencontainers.image.title="SutraWorks HTTP Server"
