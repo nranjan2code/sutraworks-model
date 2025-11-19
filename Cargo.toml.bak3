@@ -12,7 +12,6 @@ members = [
     "crates/sutra-training",
     "crates/sutra-train",
     "crates/sutra-demo",
-    "crates/sutra-server",
     "examples",
 ]
 

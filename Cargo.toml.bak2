@@ -66,6 +66,7 @@ sutra-training = { path = "crates/sutra-training" }
 sutra-train = { path = "crates/sutra-train" }
 sutra-demo = { path = "crates/sutra-demo" }
 sutra-server = { path = "crates/sutra-server" }
+    "crates/sutra-server",
 
 [profile.release]
 opt-level = 3
